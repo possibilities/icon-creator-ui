@@ -1,4 +1,5 @@
 import { getAllPolyhedronNames, getPolyhedronData } from '@/lib/polyhedra'
+import ShapeViewer from '@/components/shape-viewer'
 
 export const dynamicParams = false
 
@@ -26,11 +27,11 @@ export default async function PolyhedronPage({ params }: PageProps) {
         {data!.name.replace(/-/g, ' ')}
       </h1>
 
-      <div className='bg-gray-100 dark:bg-gray-800 rounded-lg p-4'>
-        <pre className='overflow-auto text-sm'>
-          {JSON.stringify(data, null, 2)}
-        </pre>
-      </div>
+      <ShapeViewer
+        vertices={data!.vertices}
+        faces={data!.faces}
+        edges={data!.edges}
+      />
     </div>
   )
 }

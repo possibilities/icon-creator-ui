@@ -15,16 +15,20 @@ declare module 'react' {
         React.HTMLAttributes<HTMLElement>,
         HTMLElement
       > & {
+        is?: string
         style?: React.CSSProperties
       }
       scene: React.DetailedHTMLProps<
         React.HTMLAttributes<HTMLElement>,
         HTMLElement
-      >
+      > & {
+        is?: string
+      }
       viewpoint: React.DetailedHTMLProps<
         React.HTMLAttributes<HTMLElement>,
         HTMLElement
       > & {
+        is?: string
         position?: string
         orientation?: string
         fieldofview?: string
@@ -32,15 +36,20 @@ declare module 'react' {
       shape: React.DetailedHTMLProps<
         React.HTMLAttributes<HTMLElement>,
         HTMLElement
-      >
+      > & {
+        is?: string
+      }
       appearance: React.DetailedHTMLProps<
         React.HTMLAttributes<HTMLElement>,
         HTMLElement
-      >
+      > & {
+        is?: string
+      }
       material: React.DetailedHTMLProps<
         React.HTMLAttributes<HTMLElement>,
         HTMLElement
       > & {
+        is?: string
         emissivecolor?: string
         diffusecolor?: string
       }
@@ -48,6 +57,7 @@ declare module 'react' {
         React.HTMLAttributes<HTMLElement>,
         HTMLElement
       > & {
+        is?: string
         solid?: string
         coordindex?: string | number[]
       }
@@ -55,6 +65,7 @@ declare module 'react' {
         React.HTMLAttributes<HTMLElement>,
         HTMLElement
       > & {
+        is?: string
         point?: string | number[]
       }
     }

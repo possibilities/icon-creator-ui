@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import 'x3dom/x3dom.css'
 
 interface ShapeViewerProps {
@@ -16,11 +16,36 @@ export default function ShapeViewer({
   scaleFactor = 0.8,
 }: ShapeViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null)
+  const [foregroundColor, setForegroundColor] = useState('1 1 1')
+
+  const rgbToX3d = (rgbString: string): string => {
+    const match = rgbString.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/)
+    if (!match) return '1 1 1'
+
+    const r = parseInt(match[1]) / 255
+    const g = parseInt(match[2]) / 255
+    const b = parseInt(match[3]) / 255
+
+    return `${r.toFixed(3)} ${g.toFixed(3)} ${b.toFixed(3)}`
+  }
 
   useEffect(() => {
     import('x3dom').then(() => {
       if (containerRef.current && window.x3dom) {
         window.x3dom.reload()
+
+        const computedStyle = getComputedStyle(document.documentElement)
+        const foreground = computedStyle.getPropertyValue('--foreground').trim()
+
+        if (foreground) {
+          const tempDiv = document.createElement('div')
+          tempDiv.style.color = `oklch(${foreground})`
+          document.body.appendChild(tempDiv)
+          const rgbColor = getComputedStyle(tempDiv).color
+          document.body.removeChild(tempDiv)
+
+          setForegroundColor(rgbToX3d(rgbColor))
+        }
       }
     })
   }, [])
@@ -38,19 +63,12 @@ export default function ShapeViewer({
     return center
   }
 
-  return (
-    <div
-      ref={containerRef}
-      className='w-full h-screen bg-gray-100 dark:bg-gray-800'
-    >
-      <x3d style={{ width: '100%', height: '100%' }}>
-        <scene>
-          <viewpoint
-            position='0 0 3'
-            orientation='0 1 0 0'
-            fieldofview='0.785398'
-          ></viewpoint>
-          {faces.map((face, index) => {
+  const x3dContent = `
+    <x3d style="width: 100%; height: 100%;">
+      <scene>
+        <viewpoint position="0 0 3" orientation="0 1 0 0" fieldofview="0.785398"></viewpoint>
+        ${faces
+          .map(face => {
             const center = calculateFaceCenter(face)
             const faceCoordinates = face
               .map(vertexIndex => {
@@ -65,22 +83,27 @@ export default function ShapeViewer({
               .join(', ')
             const faceIndices = [...Array(face.length).keys(), -1].join(' ')
 
-            return (
-              <shape key={index}>
-                <appearance>
-                  <material
-                    emissivecolor='0.6 0.8 1'
-                    diffusecolor='0 0 0'
-                  ></material>
-                </appearance>
-                <indexedfaceset solid='true' coordindex={faceIndices}>
-                  <coordinate point={faceCoordinates}></coordinate>
-                </indexedfaceset>
-              </shape>
-            )
-          })}
-        </scene>
-      </x3d>
-    </div>
+            return `
+            <shape>
+              <appearance>
+                <material emissivecolor="${foregroundColor}" diffusecolor="0 0 0"></material>
+              </appearance>
+              <indexedfaceset solid="true" coordindex="${faceIndices}">
+                <coordinate point="${faceCoordinates}"></coordinate>
+              </indexedfaceset>
+            </shape>
+          `
+          })
+          .join('')}
+      </scene>
+    </x3d>
+  `
+
+  return (
+    <div
+      ref={containerRef}
+      className='w-full h-screen bg-background'
+      dangerouslySetInnerHTML={{ __html: x3dContent }}
+    />
   )
 }

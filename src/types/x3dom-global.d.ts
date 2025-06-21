@@ -1,5 +1,13 @@
 import 'react'
 
+declare global {
+  interface Window {
+    x3dom?: {
+      reload: () => void
+    }
+  }
+}
+
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
@@ -19,7 +27,7 @@ declare module 'react' {
       > & {
         position?: string
         orientation?: string
-        fieldOfView?: string
+        fieldofview?: string
       }
       shape: React.DetailedHTMLProps<
         React.HTMLAttributes<HTMLElement>,
@@ -33,15 +41,15 @@ declare module 'react' {
         React.HTMLAttributes<HTMLElement>,
         HTMLElement
       > & {
-        emissiveColor?: string
-        diffuseColor?: string
+        emissivecolor?: string
+        diffusecolor?: string
       }
-      indexedFaceSet: React.DetailedHTMLProps<
+      indexedfaceset: React.DetailedHTMLProps<
         React.HTMLAttributes<HTMLElement>,
         HTMLElement
       > & {
         solid?: string
-        coordIndex?: string | number[]
+        coordindex?: string | number[]
       }
       coordinate: React.DetailedHTMLProps<
         React.HTMLAttributes<HTMLElement>,

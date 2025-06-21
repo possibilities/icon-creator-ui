@@ -18,9 +18,9 @@ export default function ShapeViewer({
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    import('x3dom').then(x3domModule => {
-      if (containerRef.current) {
-        x3domModule.reload()
+    import('x3dom').then(() => {
+      if (containerRef.current && window.x3dom) {
+        window.x3dom.reload()
       }
     })
   }, [])
@@ -48,7 +48,7 @@ export default function ShapeViewer({
           <viewpoint
             position='0 0 5'
             orientation='0 1 0 0'
-            fieldOfView='0.785398'
+            fieldofview='0.785398'
           ></viewpoint>
           {faces.map((face, index) => {
             const center = calculateFaceCenter(face)
@@ -69,13 +69,13 @@ export default function ShapeViewer({
               <shape key={index}>
                 <appearance>
                   <material
-                    emissiveColor='0.6 0.8 1'
-                    diffuseColor='0 0 0'
+                    emissivecolor='0.6 0.8 1'
+                    diffusecolor='0 0 0'
                   ></material>
                 </appearance>
-                <indexedFaceSet solid='true' coordIndex={faceIndices}>
+                <indexedfaceset solid='true' coordindex={faceIndices}>
                   <coordinate point={faceCoordinates}></coordinate>
-                </indexedFaceSet>
+                </indexedfaceset>
               </shape>
             )
           })}

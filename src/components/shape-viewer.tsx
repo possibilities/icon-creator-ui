@@ -14,7 +14,7 @@ interface ShapeViewerProps {
 export default function ShapeViewer({
   vertices,
   faces,
-  scaleFactor = 0.8,
+  scaleFactor = 0.95,
   viewType = 'spacious',
 }: ShapeViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -60,6 +60,22 @@ export default function ShapeViewer({
   const [dynamicCameraDistance, setDynamicCameraDistance] =
     useState(cameraDistance)
 
+  const calculateFaceCenter = useCallback(
+    (face: number[]) => {
+      const faceVertices = face.map(index => vertices[index])
+      const center = faceVertices.reduce(
+        (acc, vertex) => [
+          acc[0] + vertex[0] / faceVertices.length,
+          acc[1] + vertex[1] / faceVertices.length,
+          acc[2] + vertex[2] / faceVertices.length,
+        ],
+        [0, 0, 0],
+      )
+      return center
+    },
+    [vertices],
+  )
+
   const calculateCurrentBounds = useCallback(() => {
     const scaledVertices = faces.flatMap(face =>
       face.map(vertexIndex => {
@@ -83,7 +99,7 @@ export default function ShapeViewer({
     }, 0)
 
     return maxCoord
-  }, [faces, vertices, scaleFactor])
+  }, [faces, vertices, scaleFactor, calculateFaceCenter])
 
   useEffect(() => {
     import('x3dom').then(() => {
@@ -127,19 +143,6 @@ export default function ShapeViewer({
     cameraDistance,
     calculateCurrentBounds,
   ])
-
-  const calculateFaceCenter = (face: number[]) => {
-    const faceVertices = face.map(index => vertices[index])
-    const center = faceVertices.reduce(
-      (acc, vertex) => [
-        acc[0] + vertex[0] / faceVertices.length,
-        acc[1] + vertex[1] / faceVertices.length,
-        acc[2] + vertex[2] / faceVertices.length,
-      ],
-      [0, 0, 0],
-    )
-    return center
-  }
 
   const x3dContent = `
     <x3d width="600px" height="600px" style="width: 100%; height: 100%; display: block;">

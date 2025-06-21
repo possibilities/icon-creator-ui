@@ -1,5 +1,5 @@
 - nvim-listen
-- pnpm dev
+- pnpm load-shapes && pnpm load-fonts && pnpm dev
 - pnpm types:watch
 - pnpm lint:watch
-- run-prompt work-on-ui-app
+- run-prompt work-on-icon-creator

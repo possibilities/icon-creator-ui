@@ -3,22 +3,22 @@ import { getAllPolyhedronNames, getPolyhedronData } from '@/lib/polyhedra'
 export const dynamicParams = false
 
 export async function generateStaticParams() {
-  const models = await getAllPolyhedronNames()
+  const shapes = await getAllPolyhedronNames()
 
-  return models.map(model => ({
-    model: model,
+  return shapes.map(shape => ({
+    shape: shape,
   }))
 }
 
 interface PageProps {
   params: Promise<{
-    model: string
+    shape: string
   }>
 }
 
 export default async function PolyhedronPage({ params }: PageProps) {
   const resolvedParams = await params
-  const data = await getPolyhedronData(resolvedParams.model)
+  const data = await getPolyhedronData(resolvedParams.shape)
 
   return (
     <div className='container mx-auto p-8'>

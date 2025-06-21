@@ -4,8 +4,8 @@ import './globals.css'
 import './debug.css'
 
 export const metadata: Metadata = {
-  title: 'NextJs Template',
-  description: 'NextJs template',
+  title: 'Icon Creator',
+  description: 'Icon Creator',
 }
 
 export default function RootLayout({

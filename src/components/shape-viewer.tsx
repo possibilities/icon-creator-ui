@@ -147,7 +147,6 @@ export default function ShapeViewer({
   const x3dContent = `
     <x3d width="600px" height="600px" style="width: 100%; height: 100%; display: block;">
       <scene>
-        <background skycolor="0.05 0.05 0.05"></background>
         <viewpoint position="0 0 ${viewType === 'cozy' ? dynamicCameraDistance : cameraDistance}" orientation="0 1 0 0" fieldofview="${fieldOfView}"></viewpoint>
         ${faces
           .map(face => {

@@ -29,6 +29,33 @@ export default function ShapeViewer({
     return `${r.toFixed(3)} ${g.toFixed(3)} ${b.toFixed(3)}`
   }
 
+  const calculateBoundingSphere = () => {
+    const centroid = vertices.reduce(
+      (acc, vertex) => [
+        acc[0] + vertex[0] / vertices.length,
+        acc[1] + vertex[1] / vertices.length,
+        acc[2] + vertex[2] / vertices.length,
+      ],
+      [0, 0, 0],
+    )
+
+    const maxDistance = vertices.reduce((max, vertex) => {
+      const distance = Math.sqrt(
+        Math.pow(vertex[0] - centroid[0], 2) +
+          Math.pow(vertex[1] - centroid[1], 2) +
+          Math.pow(vertex[2] - centroid[2], 2),
+      )
+      return Math.max(max, distance)
+    }, 0)
+
+    return { centroid, radius: maxDistance }
+  }
+
+  const { radius } = calculateBoundingSphere()
+  const fieldOfView = 0.785398
+  const safetyFactor = 1.2
+  const cameraDistance = (radius / Math.sin(fieldOfView / 2)) * safetyFactor
+
   useEffect(() => {
     import('x3dom').then(() => {
       if (containerRef.current && window.x3dom) {
@@ -64,9 +91,10 @@ export default function ShapeViewer({
   }
 
   const x3dContent = `
-    <x3d style="width: 100%; height: 100%;">
+    <x3d width="600px" height="600px" style="width: 100%; height: 100%; display: block;">
       <scene>
-        <viewpoint position="0 0 3" orientation="0 1 0 0" fieldofview="0.785398"></viewpoint>
+        <background skycolor="0.05 0.05 0.05"></background>
+        <viewpoint position="0 0 ${cameraDistance}" orientation="0 1 0 0" fieldofview="${fieldOfView}"></viewpoint>
         ${faces
           .map(face => {
             const center = calculateFaceCenter(face)
@@ -100,10 +128,12 @@ export default function ShapeViewer({
   `
 
   return (
-    <div
-      ref={containerRef}
-      className='w-full h-screen bg-background'
-      dangerouslySetInnerHTML={{ __html: x3dContent }}
-    />
+    <div className='w-full h-screen flex items-center justify-center bg-background'>
+      <div
+        ref={containerRef}
+        className='w-[min(600px,90vw,90vh)] h-[min(600px,90vw,90vh)] bg-background border border-border rounded-lg overflow-hidden'
+        dangerouslySetInnerHTML={{ __html: x3dContent }}
+      />
+    </div>
   )
 }

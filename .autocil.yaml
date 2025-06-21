@@ -1,5 +1,5 @@
 - nvim-listen
-- pnpm pnpm dev
+- pnpm dev
 - pnpm types:watch
 - pnpm lint:watch
 - run-prompt work-on-icon-creator

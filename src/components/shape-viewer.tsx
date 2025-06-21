@@ -41,12 +41,12 @@ export default function ShapeViewer({
   return (
     <div
       ref={containerRef}
-      className='w-full h-[600px] bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden'
+      className='w-full h-screen bg-gray-100 dark:bg-gray-800'
     >
       <x3d style={{ width: '100%', height: '100%' }}>
         <scene>
           <viewpoint
-            position='0 0 5'
+            position='0 0 3'
             orientation='0 1 0 0'
             fieldofview='0.785398'
           ></viewpoint>

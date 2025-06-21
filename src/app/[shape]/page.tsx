@@ -22,16 +22,10 @@ export default async function PolyhedronPage({ params }: PageProps) {
   const data = await getPolyhedronData(resolvedParams.shape)
 
   return (
-    <div className='container mx-auto p-8'>
-      <h1 className='text-3xl font-bold mb-6 capitalize'>
-        {data!.name.replace(/-/g, ' ')}
-      </h1>
-
-      <ShapeViewer
-        vertices={data!.vertices}
-        faces={data!.faces}
-        edges={data!.edges}
-      />
-    </div>
+    <ShapeViewer
+      vertices={data!.vertices}
+      faces={data!.faces}
+      edges={data!.edges}
+    />
   )
 }

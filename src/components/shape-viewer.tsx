@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import 'x3dom/x3dom.css'
 
 interface ShapeViewerProps {
@@ -8,12 +8,14 @@ interface ShapeViewerProps {
   faces: number[][]
   edges: number[][]
   scaleFactor?: number
+  viewType?: 'spacious' | 'cozy'
 }
 
 export default function ShapeViewer({
   vertices,
   faces,
   scaleFactor = 0.8,
+  viewType = 'spacious',
 }: ShapeViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [foregroundColor, setForegroundColor] = useState('1 1 1')
@@ -53,8 +55,35 @@ export default function ShapeViewer({
 
   const { radius } = calculateBoundingSphere()
   const fieldOfView = 0.785398
-  const safetyFactor = 1.2
+  const safetyFactor = viewType === 'spacious' ? 1.2 : 1.0
   const cameraDistance = (radius / Math.sin(fieldOfView / 2)) * safetyFactor
+  const [dynamicCameraDistance, setDynamicCameraDistance] =
+    useState(cameraDistance)
+
+  const calculateCurrentBounds = useCallback(() => {
+    const scaledVertices = faces.flatMap(face =>
+      face.map(vertexIndex => {
+        const vertex = vertices[vertexIndex]
+        const faceCenter = calculateFaceCenter(face)
+        return [
+          faceCenter[0] + (vertex[0] - faceCenter[0]) * scaleFactor,
+          faceCenter[1] + (vertex[1] - faceCenter[1]) * scaleFactor,
+          faceCenter[2] + (vertex[2] - faceCenter[2]) * scaleFactor,
+        ]
+      }),
+    )
+
+    const maxCoord = scaledVertices.reduce((max, vertex) => {
+      const absMax = Math.max(
+        Math.abs(vertex[0]),
+        Math.abs(vertex[1]),
+        Math.abs(vertex[2]),
+      )
+      return Math.max(max, absMax)
+    }, 0)
+
+    return maxCoord
+  }, [faces, vertices, scaleFactor])
 
   useEffect(() => {
     import('x3dom').then(() => {
@@ -77,6 +106,28 @@ export default function ShapeViewer({
     })
   }, [])
 
+  useEffect(() => {
+    if (viewType === 'cozy') {
+      const currentMaxRadius = calculateCurrentBounds()
+      const cozyPadding = 0.1
+      const fovRadians = fieldOfView
+      const halfFov = fovRadians / 2
+      const distanceNeeded =
+        (currentMaxRadius + cozyPadding) / Math.tan(halfFov)
+      setDynamicCameraDistance(distanceNeeded)
+    } else {
+      setDynamicCameraDistance(cameraDistance)
+    }
+  }, [
+    viewType,
+    vertices,
+    faces,
+    scaleFactor,
+    fieldOfView,
+    cameraDistance,
+    calculateCurrentBounds,
+  ])
+
   const calculateFaceCenter = (face: number[]) => {
     const faceVertices = face.map(index => vertices[index])
     const center = faceVertices.reduce(
@@ -94,7 +145,7 @@ export default function ShapeViewer({
     <x3d width="600px" height="600px" style="width: 100%; height: 100%; display: block;">
       <scene>
         <background skycolor="0.05 0.05 0.05"></background>
-        <viewpoint position="0 0 ${cameraDistance}" orientation="0 1 0 0" fieldofview="${fieldOfView}"></viewpoint>
+        <viewpoint position="0 0 ${viewType === 'cozy' ? dynamicCameraDistance : cameraDistance}" orientation="0 1 0 0" fieldofview="${fieldOfView}"></viewpoint>
         ${faces
           .map(face => {
             const center = calculateFaceCenter(face)
@@ -128,10 +179,10 @@ export default function ShapeViewer({
   `
 
   return (
-    <div className='w-full h-screen flex items-center justify-center bg-background'>
+    <div className='w-full h-full flex items-center justify-center bg-background'>
       <div
         ref={containerRef}
-        className='w-[min(600px,90vw,90vh)] h-[min(600px,90vw,90vh)] bg-background border border-border rounded-lg overflow-hidden'
+        className='w-full h-full bg-background border border-border rounded-lg overflow-hidden'
         dangerouslySetInnerHTML={{ __html: x3dContent }}
       />
     </div>

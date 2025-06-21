@@ -184,7 +184,7 @@ export default function ShapeViewer({
     <div className='w-full h-full flex items-center justify-center bg-background'>
       <div
         ref={containerRef}
-        className='w-full h-full bg-background border border-border rounded-lg overflow-hidden'
+        className='aspect-square w-full max-w-full max-h-full bg-background border-2 border-border rounded-lg overflow-hidden'
         dangerouslySetInnerHTML={{ __html: x3dContent }}
       />
     </div>

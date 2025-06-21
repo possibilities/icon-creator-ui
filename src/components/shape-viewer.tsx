@@ -2,23 +2,26 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react'
 import 'x3dom/x3dom.css'
+import { GAP_SIZE } from '@/lib/defaults'
+import { gapToScaleFactor } from '@/lib/utils'
 
 interface ShapeViewerProps {
   vertices: number[][]
   faces: number[][]
   edges: number[][]
-  scaleFactor?: number
+  gapSize?: number
   viewType?: 'spacious' | 'cozy'
 }
 
 export default function ShapeViewer({
   vertices,
   faces,
-  scaleFactor = 0.95,
+  gapSize = GAP_SIZE,
   viewType = 'spacious',
 }: ShapeViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [foregroundColor, setForegroundColor] = useState('1 1 1')
+  const scaleFactor = gapToScaleFactor(gapSize)
 
   const rgbToX3d = (rgbString: string): string => {
     const match = rgbString.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/)
@@ -99,7 +102,7 @@ export default function ShapeViewer({
     }, 0)
 
     return maxCoord
-  }, [faces, vertices, scaleFactor, calculateFaceCenter])
+  }, [faces, vertices, gapSize, calculateFaceCenter])
 
   useEffect(() => {
     import('x3dom').then(() => {
@@ -138,7 +141,7 @@ export default function ShapeViewer({
     viewType,
     vertices,
     faces,
-    scaleFactor,
+    gapSize,
     fieldOfView,
     cameraDistance,
     calculateCurrentBounds,

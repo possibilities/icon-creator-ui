@@ -114,9 +114,9 @@ export default function ShapeViewer({
 
   const x3dContent = useMemo(
     () => `
-    <x3d width="${dimensions.width}px" height="${dimensions.height}px" style="width: 100%; height: 100%; display: block;">
+    <x3d style="width: 100%; height: 100%; display: block;">
       <scene>
-        <viewpoint position="0 0 ${cameraDistance}" orientation="0 1 0 0" fieldofview="${fieldOfView}"></viewpoint>
+        <viewpoint></viewpoint>
         ${faces
           .map(face => {
             const center = calculateFaceCenter(face)
@@ -148,17 +148,7 @@ export default function ShapeViewer({
       </scene>
     </x3d>
   `,
-    [
-      dimensions.width,
-      dimensions.height,
-      cameraDistance,
-      fieldOfView,
-      faces,
-      calculateFaceCenter,
-      vertices,
-      scaleFactor,
-      foregroundColor,
-    ],
+    [faces, calculateFaceCenter, vertices, scaleFactor, foregroundColor],
   )
 
   useEffect(() => {
@@ -166,12 +156,27 @@ export default function ShapeViewer({
 
     containerRef.current.innerHTML = x3dContent
 
-    setTimeout(() => {
-      if (window.x3dom && typeof window.x3dom.reload === 'function') {
-        window.x3dom.reload()
-      }
-    }, 100)
+    if (window.x3dom && typeof window.x3dom.reload === 'function') {
+      window.x3dom.reload()
+    }
   }, [x3dContent, shapeName])
+
+  useEffect(() => {
+    if (!containerRef.current) return
+
+    const x3dEl = containerRef.current.querySelector('x3d')
+    const viewpoint = containerRef.current.querySelector('viewpoint')
+
+    if (x3dEl) {
+      x3dEl.setAttribute('width', `${dimensions.width}px`)
+      x3dEl.setAttribute('height', `${dimensions.height}px`)
+    }
+
+    if (viewpoint) {
+      viewpoint.setAttribute('position', `0 0 ${cameraDistance}`)
+      viewpoint.setAttribute('fieldofview', `${fieldOfView}`)
+    }
+  }, [dimensions, cameraDistance, fieldOfView])
 
   return (
     <div

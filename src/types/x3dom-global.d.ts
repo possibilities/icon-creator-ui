@@ -16,6 +16,8 @@ declare module 'react' {
         HTMLElement
       > & {
         is?: string
+        width?: string
+        height?: string
         style?: React.CSSProperties
       }
       scene: React.DetailedHTMLProps<

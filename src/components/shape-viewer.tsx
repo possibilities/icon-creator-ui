@@ -19,6 +19,7 @@ export default function ShapeViewer({
 }: ShapeViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [foregroundColor, setForegroundColor] = useState('1 1 1')
+  const [cameraDistance, setCameraDistance] = useState(0)
   const scaleFactor = gapToScaleFactor(gapSize)
 
   const rgbToX3d = (rgbString: string): string => {
@@ -56,8 +57,17 @@ export default function ShapeViewer({
 
   const { radius } = calculateBoundingSphere()
   const fieldOfView = 0.785398
-  const safetyFactor = 1.2
-  const cameraDistance = (radius / Math.sin(fieldOfView / 2)) * safetyFactor
+  const safetyFactor = 1.0
+
+  const updateCameraDistance = useCallback(() => {
+    if (!containerRef.current) return
+    const { width, height } = containerRef.current.getBoundingClientRect()
+    const aspect = width / height
+    const horizontalFov = 2 * Math.atan(Math.tan(fieldOfView / 2) * aspect)
+    const verticalDist = radius / Math.sin(fieldOfView / 2)
+    const horizontalDist = radius / Math.sin(horizontalFov / 2)
+    setCameraDistance(Math.max(verticalDist, horizontalDist) * safetyFactor)
+  }, [radius, fieldOfView, safetyFactor])
 
   const calculateFaceCenter = useCallback(
     (face: number[]) => {
@@ -76,60 +86,68 @@ export default function ShapeViewer({
   )
 
   useEffect(() => {
-    const computedStyle = getComputedStyle(document.documentElement)
-    const foreground = computedStyle.getPropertyValue('--foreground').trim()
+    updateCameraDistance()
+    if (containerRef.current && window.x3dom) {
+      window.x3dom.reload()
+      updateCameraDistance()
 
-    if (foreground) {
-      const tempDiv = document.createElement('div')
-      tempDiv.style.color = `oklch(${foreground})`
-      document.body.appendChild(tempDiv)
-      const rgbColor = getComputedStyle(tempDiv).color
-      document.body.removeChild(tempDiv)
+      const computedStyle = getComputedStyle(document.documentElement)
+      const foreground = computedStyle.getPropertyValue('--foreground').trim()
 
-      setForegroundColor(rgbToX3d(rgbColor))
+      if (foreground) {
+        const tempDiv = document.createElement('div')
+        tempDiv.style.color = `oklch(${foreground})`
+        document.body.appendChild(tempDiv)
+        const rgbColor = getComputedStyle(tempDiv).color
+        document.body.removeChild(tempDiv)
+
+        setForegroundColor(rgbToX3d(rgbColor))
+      }
     }
-  }, [])
+    window.addEventListener('resize', updateCameraDistance)
+    return () => window.removeEventListener('resize', updateCameraDistance)
+  }, [updateCameraDistance])
+
+  const x3dContent = `
+    <x3d width="600px" height="600px" style="width: 100%; height: 100%; display: block;">
+      <scene>
+        <viewpoint position="0 0 ${cameraDistance}" orientation="0 1 0 0" fieldofview="${fieldOfView}"></viewpoint>
+        ${faces
+          .map(face => {
+            const center = calculateFaceCenter(face)
+            const faceCoordinates = face
+              .map(vertexIndex => {
+                const vertex = vertices[vertexIndex]
+                const scaledVertex = [
+                  center[0] + (vertex[0] - center[0]) * scaleFactor,
+                  center[1] + (vertex[1] - center[1]) * scaleFactor,
+                  center[2] + (vertex[2] - center[2]) * scaleFactor,
+                ]
+                return scaledVertex.join(' ')
+              })
+              .join(', ')
+            const faceIndices = [...Array(face.length).keys(), -1].join(' ')
+
+            return `
+            <shape>
+              <appearance>
+                <material emissivecolor="${foregroundColor}" diffusecolor="0 0 0"></material>
+              </appearance>
+              <indexedfaceset solid="true" coordindex="${faceIndices}">
+                <coordinate point="${faceCoordinates}"></coordinate>
+              </indexedfaceset>
+            </shape>
+          `
+          })
+          .join('')}
+      </scene>
+    </x3d>
+  `
 
   useEffect(() => {
     if (!containerRef.current) return
 
-    const sceneContent = faces
-      .map(face => {
-        const center = calculateFaceCenter(face)
-        const faceCoordinates = face
-          .map(vertexIndex => {
-            const vertex = vertices[vertexIndex]
-            const scaledVertex = [
-              center[0] + (vertex[0] - center[0]) * scaleFactor,
-              center[1] + (vertex[1] - center[1]) * scaleFactor,
-              center[2] + (vertex[2] - center[2]) * scaleFactor,
-            ]
-            return scaledVertex.join(' ')
-          })
-          .join(', ')
-        const faceIndices = [...Array(face.length).keys(), -1].join(' ')
-
-        return `
-        <shape>
-          <appearance>
-            <material emissivecolor="${foregroundColor}" diffusecolor="0 0 0"></material>
-          </appearance>
-          <indexedfaceset solid="true" coordindex="${faceIndices}">
-            <coordinate point="${faceCoordinates}"></coordinate>
-          </indexedfaceset>
-        </shape>
-      `
-      })
-      .join('')
-
-    containerRef.current.innerHTML = `
-      <x3d width="600px" height="600px" style="width: 100%; height: 100%; display: block;">
-        <scene>
-          <viewpoint position="0 0 ${cameraDistance}" orientation="0 1 0 0" fieldofview="${fieldOfView}"></viewpoint>
-          ${sceneContent}
-        </scene>
-      </x3d>
-    `
+    containerRef.current.innerHTML = x3dContent
 
     setTimeout(() => {
       if (window.x3dom && typeof window.x3dom.reload === 'function') {
@@ -145,6 +163,7 @@ export default function ShapeViewer({
     cameraDistance,
     fieldOfView,
     calculateFaceCenter,
+    x3dContent,
   ])
 
   return (

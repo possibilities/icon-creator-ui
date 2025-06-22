@@ -1,6 +1,12 @@
 'use client'
 
-import { useEffect, useRef, useState, useCallback } from 'react'
+import {
+  useRef,
+  useState,
+  useCallback,
+  useMemo,
+  useLayoutEffect,
+} from 'react'
 import 'x3dom/x3dom.css'
 import { GAP_SIZE } from '@/lib/defaults'
 import { gapToScaleFactor } from '@/lib/utils'
@@ -75,28 +81,8 @@ export default function ShapeViewer({
     [vertices],
   )
 
-  useEffect(() => {
-    import('x3dom').then(() => {
-      if (containerRef.current && window.x3dom) {
-        window.x3dom.reload()
-
-        const computedStyle = getComputedStyle(document.documentElement)
-        const foreground = computedStyle.getPropertyValue('--foreground').trim()
-
-        if (foreground) {
-          const tempDiv = document.createElement('div')
-          tempDiv.style.color = `oklch(${foreground})`
-          document.body.appendChild(tempDiv)
-          const rgbColor = getComputedStyle(tempDiv).color
-          document.body.removeChild(tempDiv)
-
-          setForegroundColor(rgbToX3d(rgbColor))
-        }
-      }
-    })
-  }, [])
-
-  const x3dContent = `
+  const x3dContent = useMemo(() => {
+    return `
     <x3d width="600px" height="600px" style="width: 100%; height: 100%; display: block;">
       <scene>
         <viewpoint position="0 0 ${cameraDistance}" orientation="0 1 0 0" fieldofview="${fieldOfView}"></viewpoint>
@@ -131,13 +117,47 @@ export default function ShapeViewer({
       </scene>
     </x3d>
   `
+  }, [faces, vertices, foregroundColor, scaleFactor, cameraDistance, fieldOfView, calculateFaceCenter])
+
+  useLayoutEffect(() => {
+    let isMounted = true
+    const container = containerRef.current
+
+    import('x3dom').then(() => {
+      if (!isMounted || !container) return
+
+      container.innerHTML = x3dContent
+      if (window.x3dom) {
+        window.x3dom.reload()
+
+        const computedStyle = getComputedStyle(document.documentElement)
+        const foreground = computedStyle.getPropertyValue('--foreground').trim()
+
+        if (foreground) {
+          const tempDiv = document.createElement('div')
+          tempDiv.style.color = `oklch(${foreground})`
+          document.body.appendChild(tempDiv)
+          const rgbColor = getComputedStyle(tempDiv).color
+          document.body.removeChild(tempDiv)
+
+          setForegroundColor(rgbToX3d(rgbColor))
+        }
+      }
+    })
+
+    return () => {
+      isMounted = false
+      if (container) {
+        container.innerHTML = ''
+      }
+    }
+  }, [x3dContent])
 
   return (
     <div className='w-full h-full flex items-center justify-center bg-background'>
       <div
         ref={containerRef}
         className='bg-background border border-border rounded-lg overflow-hidden'
-        dangerouslySetInnerHTML={{ __html: x3dContent }}
       />
     </div>
   )

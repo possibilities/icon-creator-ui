@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Script from 'next/script'
 import { ThemeProvider } from '@/lib/theme-provider'
+import ThemeSwitcher from '@/components/theme-switcher'
 import './globals.css'
 import './debug.css'
 
@@ -33,6 +34,7 @@ export default function RootLayout({
       </head>
       <body>
         <ThemeProvider>
+          <ThemeSwitcher />
           <div className='flex h-screen'>
             <div className='ml-[25%] w-3/4 h-screen'>{children}</div>
           </div>

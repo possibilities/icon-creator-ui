@@ -23,11 +23,7 @@ export default async function PolyhedronPage({ params }: PageProps) {
 
   return (
     <div className='w-full h-screen p-4'>
-      <ShapeViewer
-        vertices={data!.vertices}
-        faces={data!.faces}
-        edges={data!.edges}
-      />
+      <ShapeViewer vertices={data!.vertices} faces={data!.faces} />
     </div>
   )
 }

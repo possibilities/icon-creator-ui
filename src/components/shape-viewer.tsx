@@ -8,7 +8,6 @@ import { gapToScaleFactor } from '@/lib/utils'
 interface ShapeViewerProps {
   vertices: number[][]
   faces: number[][]
-  edges: number[][]
   gapSize?: number
 }
 

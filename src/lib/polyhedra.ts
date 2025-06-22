@@ -9,7 +9,6 @@ const DATA_PATH = 'src/data/polyhedra'
 interface PolyhedronData {
   name: string
   vertices: number[][]
-  edges: number[][]
   faces: number[][]
 }
 

@@ -5,14 +5,12 @@ import { GAP_SIZE, FIELD_OF_VIEW } from '@/lib/defaults'
 import { gapToScaleFactor } from '@/lib/utils'
 
 interface ShapeViewerProps {
-  shapeName: string
   vertices: number[][]
   faces: number[][]
   gapSize?: number
 }
 
 export default function ShapeViewer({
-  shapeName,
   vertices,
   faces,
   gapSize = GAP_SIZE,
@@ -91,10 +89,7 @@ export default function ShapeViewer({
 
   useEffect(() => {
     updateCameraDistance()
-    if (containerRef.current && window.x3dom) {
-      window.x3dom.reload()
-      updateCameraDistance()
-
+    if (containerRef.current) {
       const computedStyle = getComputedStyle(document.documentElement)
       const foreground = computedStyle.getPropertyValue('--foreground').trim()
 
@@ -114,9 +109,9 @@ export default function ShapeViewer({
 
   const x3dContent = useMemo(
     () => `
-    <x3d width="${dimensions.width}px" height="${dimensions.height}px" style="width: 100%; height: 100%; display: block;">
+    <x3d style="width: 100%; height: 100%; display: block;">
       <scene>
-        <viewpoint position="0 0 ${cameraDistance}" orientation="0 1 0 0" fieldofview="${fieldOfView}"></viewpoint>
+        <viewpoint orientation="0 1 0 0" fieldofview="${fieldOfView}"></viewpoint>
         ${faces
           .map(face => {
             const center = calculateFaceCenter(face)
@@ -148,17 +143,7 @@ export default function ShapeViewer({
       </scene>
     </x3d>
   `,
-    [
-      dimensions.width,
-      dimensions.height,
-      cameraDistance,
-      fieldOfView,
-      faces,
-      calculateFaceCenter,
-      vertices,
-      scaleFactor,
-      foregroundColor,
-    ],
+    [fieldOfView, faces, calculateFaceCenter, vertices, scaleFactor, foregroundColor],
   )
 
   useEffect(() => {
@@ -171,7 +156,24 @@ export default function ShapeViewer({
         window.x3dom.reload()
       }
     }, 100)
-  }, [x3dContent, shapeName])
+  }, [x3dContent])
+
+  useEffect(() => {
+    if (!containerRef.current) return
+
+    const x3dEl = containerRef.current.querySelector('x3d') as HTMLElement | null
+    if (x3dEl) {
+      x3dEl.setAttribute('width', `${dimensions.width}px`)
+      x3dEl.setAttribute('height', `${dimensions.height}px`)
+      x3dEl.style.width = `${dimensions.width}px`
+      x3dEl.style.height = `${dimensions.height}px`
+    }
+
+    const vp = containerRef.current.querySelector('viewpoint') as HTMLElement | null
+    if (vp) {
+      vp.setAttribute('position', `0 0 ${cameraDistance}`)
+    }
+  }, [dimensions, cameraDistance])
 
   return (
     <div

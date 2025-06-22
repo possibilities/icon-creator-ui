@@ -127,27 +127,38 @@ export default function ShapeViewer({
       if (!isMounted || !container) return
 
       container.innerHTML = x3dContent
-      if (window.x3dom) {
-        window.x3dom.reload()
 
-        const computedStyle = getComputedStyle(document.documentElement)
-        const foreground = computedStyle.getPropertyValue('--foreground').trim()
+      setTimeout(() => {
+        if (!isMounted || !container) return
 
-        if (foreground) {
-          const tempDiv = document.createElement('div')
-          tempDiv.style.color = `oklch(${foreground})`
-          document.body.appendChild(tempDiv)
-          const rgbColor = getComputedStyle(tempDiv).color
-          document.body.removeChild(tempDiv)
+        if (window.x3dom) {
+          window.x3dom.reload()
 
-          setForegroundColor(rgbToX3d(rgbColor))
+          const canvas = container.querySelector('canvas')
+          canvas?.setAttribute('tabIndex', '-1')
+          canvas?.setAttribute('aria-label', '3D model viewer')
+
+          const computedStyle = getComputedStyle(document.documentElement)
+          const foreground = computedStyle.getPropertyValue('--foreground').trim()
+
+          if (foreground) {
+            const tempDiv = document.createElement('div')
+            tempDiv.style.color = `oklch(${foreground})`
+            document.body.appendChild(tempDiv)
+            const rgbColor = getComputedStyle(tempDiv).color
+            document.body.removeChild(tempDiv)
+
+            setForegroundColor(rgbToX3d(rgbColor))
+          }
         }
-      }
+      }, 0)
     })
 
     return () => {
       isMounted = false
       if (container) {
+        const canvas = container.querySelector('canvas')
+        canvas?.remove()
         container.innerHTML = ''
       }
     }

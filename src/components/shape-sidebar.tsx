@@ -27,7 +27,7 @@ export default function ShapeSidebar({ shapes }: ShapeSidebarProps) {
   }
 
   return (
-    <aside className='fixed left-0 top-0 h-full w-1/4 border-r border-border bg-background p-4'>
+    <aside className='fixed right-0 top-0 h-full w-1/4 border-l border-border bg-background p-4'>
       <Select value={currentShape} onValueChange={handleShapeChange}>
         <SelectTrigger className='w-full'>
           <SelectValue placeholder='Select a shape'>

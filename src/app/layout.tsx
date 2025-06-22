@@ -34,7 +34,7 @@ export default function RootLayout({
       <body>
         <ThemeProvider>
           <div className='flex h-screen'>
-            <div className='flex-1 ml-[25%]'>{children}</div>
+            <div className='flex-1 mr-[25%]'>{children}</div>
           </div>
         </ThemeProvider>
         <Script src='/vendor/x3dom.js' strategy='beforeInteractive' />

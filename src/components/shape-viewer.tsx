@@ -5,14 +5,12 @@ import { GAP_SIZE, FIELD_OF_VIEW } from '@/lib/defaults'
 import { gapToScaleFactor } from '@/lib/utils'
 
 interface ShapeViewerProps {
-  shapeName: string
   vertices: number[][]
   faces: number[][]
   gapSize?: number
 }
 
 export default function ShapeViewer({
-  shapeName,
   vertices,
   faces,
   gapSize = GAP_SIZE,
@@ -92,9 +90,6 @@ export default function ShapeViewer({
   useEffect(() => {
     updateCameraDistance()
     if (containerRef.current && window.x3dom) {
-      window.x3dom.reload()
-      updateCameraDistance()
-
       const computedStyle = getComputedStyle(document.documentElement)
       const foreground = computedStyle.getPropertyValue('--foreground').trim()
 
@@ -114,7 +109,7 @@ export default function ShapeViewer({
 
   const x3dContent = useMemo(
     () => `
-    <x3d width="${dimensions.width}px" height="${dimensions.height}px" style="width: 100%; height: 100%; display: block;">
+    <x3d style="width: 100%; height: 100%; display: block;">
       <scene>
         <viewpoint position="0 0 ${cameraDistance}" orientation="0 1 0 0" fieldofview="${fieldOfView}"></viewpoint>
         ${faces
@@ -148,17 +143,8 @@ export default function ShapeViewer({
       </scene>
     </x3d>
   `,
-    [
-      dimensions.width,
-      dimensions.height,
-      cameraDistance,
-      fieldOfView,
-      faces,
-      calculateFaceCenter,
-      vertices,
-      scaleFactor,
-      foregroundColor,
-    ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [fieldOfView, faces, calculateFaceCenter, vertices, scaleFactor, foregroundColor],
   )
 
   useEffect(() => {
@@ -166,12 +152,25 @@ export default function ShapeViewer({
 
     containerRef.current.innerHTML = x3dContent
 
-    setTimeout(() => {
-      if (window.x3dom && typeof window.x3dom.reload === 'function') {
-        window.x3dom.reload()
-      }
-    }, 100)
-  }, [x3dContent, shapeName])
+    if (window.x3dom && typeof window.x3dom.reload === 'function') {
+      window.x3dom.reload()
+    }
+  }, [x3dContent])
+
+  useEffect(() => {
+    const view = containerRef.current?.querySelector('viewpoint') as HTMLElement | null
+    if (view) {
+      view.setAttribute('position', `0 0 ${cameraDistance}`)
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const x3dEl = containerRef.current?.querySelector('x3d') as any
+    const runtimeCanvas = x3dEl?.runtime?.canvas
+    const resizeFn = runtimeCanvas?.resize || runtimeCanvas?.doResize
+    if (typeof resizeFn === 'function') {
+      resizeFn.call(runtimeCanvas)
+    }
+  }, [dimensions.width, dimensions.height, cameraDistance])
 
   return (
     <div

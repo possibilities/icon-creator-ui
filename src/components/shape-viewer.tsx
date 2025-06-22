@@ -25,7 +25,8 @@ export default function ShapeViewer({
   const [foregroundColor, setForegroundColor] = useState('1 1 1')
   const [cameraDistance, setCameraDistance] = useState(0)
   const [dimensions, setDimensions] = useState({ width: 600, height: 600 })
-  const scaleFactor = gapToScaleFactor(gapSize)
+  const [initialGap] = useState(gapSize)
+  const initialScaleFactor = gapToScaleFactor(initialGap)
 
   const rgbToX3d = (rgbString: string): string => {
     const match = rgbString.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/)
@@ -121,9 +122,9 @@ export default function ShapeViewer({
             .map(vertexIndex => {
               const vertex = vertices[vertexIndex]
               const scaledVertex = [
-                center[0] + (vertex[0] - center[0]) * scaleFactor,
-                center[1] + (vertex[1] - center[1]) * scaleFactor,
-                center[2] + (vertex[2] - center[2]) * scaleFactor,
+                center[0] + (vertex[0] - center[0]) * initialScaleFactor,
+                center[1] + (vertex[1] - center[1]) * initialScaleFactor,
+                center[2] + (vertex[2] - center[2]) * initialScaleFactor,
               ]
               return scaledVertex.join(' ')
             })
@@ -142,7 +143,7 @@ export default function ShapeViewer({
         `
         })
         .join(''),
-    [faces, calculateFaceCenter, vertices, scaleFactor, foregroundColor],
+    [faces, calculateFaceCenter, vertices, initialScaleFactor, foregroundColor],
   )
 
   useEffect(() => {
@@ -161,6 +162,28 @@ export default function ShapeViewer({
       window.x3dom.reload()
     }
   }, [geometryContent, shapeName])
+
+  useEffect(() => {
+    const coordinates = containerRef.current?.querySelectorAll('coordinate')
+    if (!coordinates) return
+    const scaleFactor = gapToScaleFactor(gapSize)
+    coordinates.forEach((coordEl, i) => {
+      const face = faces[i]
+      const center = calculateFaceCenter(face)
+      const faceCoordinates = face
+        .map(vertexIndex => {
+          const vertex = vertices[vertexIndex]
+          const scaledVertex = [
+            center[0] + (vertex[0] - center[0]) * scaleFactor,
+            center[1] + (vertex[1] - center[1]) * scaleFactor,
+            center[2] + (vertex[2] - center[2]) * scaleFactor,
+          ]
+          return scaledVertex.join(' ')
+        })
+        .join(', ')
+      ;(coordEl as HTMLElement).setAttribute('point', faceCoordinates)
+    })
+  }, [gapSize, faces, vertices, calculateFaceCenter])
 
   useEffect(() => {
     const x3dEl = containerRef.current?.querySelector(

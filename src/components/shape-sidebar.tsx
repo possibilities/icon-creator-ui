@@ -11,15 +11,25 @@ import {
 
 interface ShapeSidebarProps {
   shapes: string[]
+  gap: number
+  onGapChange: (gap: number) => void
 }
 
-export default function ShapeSidebar({ shapes }: ShapeSidebarProps) {
+export default function ShapeSidebar({
+  shapes,
+  gap,
+  onGapChange,
+}: ShapeSidebarProps) {
   const router = useRouter()
   const params = useParams()
   const currentShape = params.shape as string
 
   const handleShapeChange = (value: string) => {
     router.push(`/${value}`)
+  }
+
+  const handleGapChange = (value: string) => {
+    onGapChange(Number(value))
   }
 
   const formatShapeName = (name: string) => {
@@ -42,6 +52,20 @@ export default function ShapeSidebar({ shapes }: ShapeSidebarProps) {
           ))}
         </SelectContent>
       </Select>
+      <div className='mt-4'>
+        <Select value={gap.toString()} onValueChange={handleGapChange}>
+          <SelectTrigger className='w-full'>
+            <SelectValue placeholder='Gap'>{gap}</SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            {Array.from({ length: 20 }, (_, i) => i + 1).map(v => (
+              <SelectItem key={v} value={v.toString()}>
+                {v}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
     </aside>
   )
 }

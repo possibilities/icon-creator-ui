@@ -1,6 +1,5 @@
 import { getAllPolyhedronNames, getPolyhedronData } from '@/lib/polyhedra'
-import ShapeViewer from '@/components/shape-viewer'
-import ShapeSidebar from '@/components/shape-sidebar'
+import ShapeContainer from '@/components/shape-container'
 
 export const dynamicParams = false
 
@@ -24,16 +23,11 @@ export default async function PolyhedronPage({ params }: PageProps) {
   const shapes = await getAllPolyhedronNames()
 
   return (
-    <>
-      <ShapeSidebar shapes={shapes} />
-      <div className='w-full h-screen'>
-        <ShapeViewer
-          key={resolvedParams.shape}
-          shapeName={resolvedParams.shape}
-          vertices={data!.vertices}
-          faces={data!.faces}
-        />
-      </div>
-    </>
+    <ShapeContainer
+      shapes={shapes}
+      shapeName={resolvedParams.shape}
+      vertices={data!.vertices}
+      faces={data!.faces}
+    />
   )
 }

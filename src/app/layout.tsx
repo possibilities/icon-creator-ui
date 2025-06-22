@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Script from 'next/script'
 import { ThemeProvider } from '@/lib/theme-provider'
 import './globals.css'
 import './debug.css'
@@ -28,9 +29,11 @@ export default function RootLayout({
           href='https://fonts.googleapis.com/css2?family=Geist+Mono:wght@100..900&display=optional'
           rel='stylesheet'
         />
+        <link rel='stylesheet' href='/vendor/x3dom.css' />
       </head>
       <body>
         <ThemeProvider>{children}</ThemeProvider>
+        <Script src='/vendor/x3dom.js' strategy='beforeInteractive' />
       </body>
     </html>
   )

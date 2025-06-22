@@ -11,50 +11,6 @@ interface ShapeViewerProps {
   gapSize?: number
 }
 
-let x3domScriptLoaded = false
-let x3domCSSLoaded = false
-
-function loadX3DOMScript(): Promise<{ success: boolean; error?: string }> {
-  if (x3domScriptLoaded || typeof window === 'undefined') {
-    return Promise.resolve({ success: true })
-  }
-
-  return new Promise(resolve => {
-    const script = document.createElement('script')
-    script.src = 'https://www.x3dom.org/release/x3dom.js'
-
-    const timeout = setTimeout(() => {
-      console.error('X3DOM script loading timeout')
-      resolve({
-        success: false,
-        error: 'Loading timeout - X3DOM may be unavailable',
-      })
-    }, 10000)
-
-    script.onload = () => {
-      clearTimeout(timeout)
-      x3domScriptLoaded = true
-      resolve({ success: true })
-    }
-
-    script.onerror = () => {
-      clearTimeout(timeout)
-      console.error('Failed to load X3DOM from CDN')
-      resolve({ success: false, error: 'Failed to load 3D viewer library' })
-    }
-
-    document.head.appendChild(script)
-
-    if (!x3domCSSLoaded) {
-      const link = document.createElement('link')
-      link.rel = 'stylesheet'
-      link.href = 'https://www.x3dom.org/release/x3dom.css'
-      document.head.appendChild(link)
-      x3domCSSLoaded = true
-    }
-  })
-}
-
 export default function ShapeViewer({
   shapeName,
   vertices,
@@ -63,8 +19,6 @@ export default function ShapeViewer({
 }: ShapeViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [foregroundColor, setForegroundColor] = useState('1 1 1')
-  const [isReady, setIsReady] = useState(false)
-  const [loadError, setLoadError] = useState<string | null>(null)
   const scaleFactor = gapToScaleFactor(gapSize)
 
   const rgbToX3d = (rgbString: string): string => {
@@ -122,16 +76,6 @@ export default function ShapeViewer({
   )
 
   useEffect(() => {
-    loadX3DOMScript().then(result => {
-      if (result.success) {
-        setIsReady(true)
-      } else {
-        setLoadError(result.error || 'Unknown error loading 3D viewer')
-      }
-    })
-  }, [])
-
-  useEffect(() => {
     const computedStyle = getComputedStyle(document.documentElement)
     const foreground = computedStyle.getPropertyValue('--foreground').trim()
 
@@ -147,7 +91,7 @@ export default function ShapeViewer({
   }, [])
 
   useEffect(() => {
-    if (!isReady || !containerRef.current) return
+    if (!containerRef.current) return
 
     const sceneContent = faces
       .map(face => {
@@ -194,7 +138,6 @@ export default function ShapeViewer({
     }, 100)
   }, [
     shapeName,
-    isReady,
     vertices,
     faces,
     scaleFactor,
@@ -203,25 +146,6 @@ export default function ShapeViewer({
     fieldOfView,
     calculateFaceCenter,
   ])
-
-  if (loadError) {
-    return (
-      <div className='w-full h-full flex items-center justify-center bg-background'>
-        <div className='text-center'>
-          <div className='text-destructive mb-2'>Unable to load 3D viewer</div>
-          <div className='text-sm text-muted-foreground'>{loadError}</div>
-        </div>
-      </div>
-    )
-  }
-
-  if (!isReady) {
-    return (
-      <div className='w-full h-full flex items-center justify-center bg-background'>
-        <div className='text-muted-foreground'>Loading 3D viewer...</div>
-      </div>
-    )
-  }
 
   return (
     <div className='w-full h-full flex items-center justify-center bg-background'>

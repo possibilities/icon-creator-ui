@@ -4,6 +4,8 @@ declare global {
   interface Window {
     x3dom?: {
       reload: () => void
+      runtime?: unknown
+      canvases?: unknown[]
     }
   }
 }

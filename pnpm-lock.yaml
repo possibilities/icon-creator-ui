@@ -32,9 +32,6 @@ importers:
       tailwind-merge:
         specifier: ^3.2.0
         version: 3.2.0
-      x3dom:
-        specifier: ^1.8.3
-        version: 1.8.3
     devDependencies:
       '@eslint/eslintrc':
         specifier: ^3
@@ -2027,9 +2024,6 @@ packages:
 
   wrappy@1.0.2:
     resolution: {integrity: sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==}
-
-  x3dom@1.8.3:
-    resolution: {integrity: sha512-sqd4bIyKEKcGG+D9fa7lB5oiOeN57a1FzX0HBZvrOGwVmFTYjNmT3zqEobzqo/YaDYc7FWi2Dvt6RBVPMXyuXA==}
 
   yocto-queue@0.1.0:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
@@ -4248,8 +4242,6 @@ snapshots:
   word-wrap@1.2.5: {}
 
   wrappy@1.0.2: {}
-
-  x3dom@1.8.3: {}
 
   yocto-queue@0.1.0: {}
 

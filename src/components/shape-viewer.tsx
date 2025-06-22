@@ -152,6 +152,10 @@ export default function ShapeViewer({
       const geometryGroup = existingScene.querySelector('#geometry-group')
       if (geometryGroup) {
         geometryGroup.innerHTML = geometryContent
+        const x3d = containerRef.current.querySelector('x3d') as X3DElement
+        if (x3d?.runtime && typeof x3d.runtime.resize === 'function') {
+          x3d.runtime.resize()
+        }
       }
     } else {
       containerRef.current.innerHTML = `

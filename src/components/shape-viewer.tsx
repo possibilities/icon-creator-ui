@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { GAP_SIZE, FIELD_OF_VIEW } from '@/lib/defaults'
-import { gapToScaleFactor } from '@/lib/utils'
+import { gapToScaleFactor } from '@/lib/polyhedra'
 
 interface ShapeViewerProps {
   shapeName: string

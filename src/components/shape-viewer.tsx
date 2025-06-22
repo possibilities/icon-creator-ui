@@ -19,6 +19,7 @@ export default function ShapeViewer({
 }: ShapeViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [foregroundColor, setForegroundColor] = useState('1 1 1')
+  const [cameraDistance, setCameraDistance] = useState(0)
   const scaleFactor = gapToScaleFactor(gapSize)
 
   const rgbToX3d = (rgbString: string): string => {
@@ -56,8 +57,17 @@ export default function ShapeViewer({
 
   const { radius } = calculateBoundingSphere()
   const fieldOfView = 0.785398
-  const safetyFactor = 1.2
-  const cameraDistance = (radius / Math.sin(fieldOfView / 2)) * safetyFactor
+  const safetyFactor = 1.0
+
+  const updateCameraDistance = useCallback(() => {
+    if (!containerRef.current) return
+    const { width, height } = containerRef.current.getBoundingClientRect()
+    const aspect = width / height
+    const horizontalFov = 2 * Math.atan(Math.tan(fieldOfView / 2) * aspect)
+    const verticalDist = radius / Math.sin(fieldOfView / 2)
+    const horizontalDist = radius / Math.sin(horizontalFov / 2)
+    setCameraDistance(Math.max(verticalDist, horizontalDist) * safetyFactor)
+  }, [radius, fieldOfView, safetyFactor])
 
   const calculateFaceCenter = useCallback(
     (face: number[]) => {
@@ -76,9 +86,11 @@ export default function ShapeViewer({
   )
 
   useEffect(() => {
+    updateCameraDistance()
     import('x3dom').then(() => {
       if (containerRef.current && window.x3dom) {
         window.x3dom.reload()
+        updateCameraDistance()
 
         const computedStyle = getComputedStyle(document.documentElement)
         const foreground = computedStyle.getPropertyValue('--foreground').trim()
@@ -94,7 +106,9 @@ export default function ShapeViewer({
         }
       }
     })
-  }, [])
+    window.addEventListener('resize', updateCameraDistance)
+    return () => window.removeEventListener('resize', updateCameraDistance)
+  }, [updateCameraDistance])
 
   const x3dContent = `
     <x3d width="600px" height="600px" style="width: 100%; height: 100%; display: block;">

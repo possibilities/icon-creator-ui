@@ -97,7 +97,7 @@ export default function ShapeViewer({
   }, [])
 
   const x3dContent = `
-    <x3d width="600px" height="600px" style="width: 100%; height: 100%; display: block;">
+    <x3d style="width: 100%; height: 100%; display: block;">
       <scene>
         <viewpoint position="0 0 ${cameraDistance}" orientation="0 1 0 0" fieldofview="${fieldOfView}"></viewpoint>
         ${faces

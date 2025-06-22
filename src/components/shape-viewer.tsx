@@ -91,7 +91,7 @@ export default function ShapeViewer({
   }
 
   const x3dContent = `
-    <x3d width="600px" height="600px" style="width: 100%; height: 100%; display: block;">
+    <x3d width="100%" height="100%" style="width: 100%; height: 100%; display: block;">
       <scene>
         <background skycolor="0.05 0.05 0.05"></background>
         <viewpoint position="0 0 ${cameraDistance}" orientation="0 1 0 0" fieldofview="${fieldOfView}"></viewpoint>
@@ -128,10 +128,10 @@ export default function ShapeViewer({
   `
 
   return (
-    <div className='w-full h-screen flex items-center justify-center bg-background'>
+    <div className='w-full h-screen p-4 flex items-center justify-center bg-background'>
       <div
         ref={containerRef}
-        className='w-[min(600px,90vw,90vh)] h-[min(600px,90vw,90vh)] bg-background border border-border rounded-lg overflow-hidden'
+        className='w-[min(calc(100vw-2rem),calc(100dvh-2rem))] h-[min(calc(100vw-2rem),calc(100dvh-2rem))] bg-background border border-border rounded-lg overflow-hidden'
         dangerouslySetInnerHTML={{ __html: x3dContent }}
       />
     </div>

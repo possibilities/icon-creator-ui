@@ -66,7 +66,7 @@ export default function ShapeViewer({
     const { width, height } = parentRef.current.getBoundingClientRect()
     const size = Math.min(width, height)
     setDimensions({ width: size, height: size })
-    const aspect = width / height
+    const aspect = 1
     const horizontalFov = 2 * Math.atan(Math.tan(fieldOfView / 2) * aspect)
     const verticalDist = radius / Math.sin(fieldOfView / 2)
     const horizontalDist = radius / Math.sin(horizontalFov / 2)
@@ -168,6 +168,7 @@ export default function ShapeViewer({
     fieldOfView,
     calculateFaceCenter,
     x3dContent,
+    dimensions,
   ])
 
   return (

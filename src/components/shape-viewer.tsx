@@ -109,7 +109,16 @@ export default function ShapeViewer({
       }
     }
     window.addEventListener('resize', updateCameraDistance)
-    return () => window.removeEventListener('resize', updateCameraDistance)
+    let resizeObserver: ResizeObserver | null = null
+    if (parentRef.current && typeof ResizeObserver !== 'undefined') {
+      resizeObserver = new ResizeObserver(updateCameraDistance)
+      resizeObserver.observe(parentRef.current)
+    }
+
+    return () => {
+      window.removeEventListener('resize', updateCameraDistance)
+      resizeObserver?.disconnect()
+    }
   }, [updateCameraDistance])
 
   const x3dContent = useMemo(

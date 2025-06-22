@@ -26,7 +26,7 @@ export default async function PolyhedronPage({ params }: PageProps) {
   return (
     <>
       <ShapeSidebar shapes={shapes} />
-      <div className='w-full h-screen p-4'>
+      <div className='w-full h-screen'>
         <ShapeViewer
           key={resolvedParams.shape}
           shapeName={resolvedParams.shape}

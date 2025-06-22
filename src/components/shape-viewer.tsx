@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { GAP_SIZE } from '@/lib/defaults'
+import { GAP_SIZE, FIELD_OF_VIEW } from '@/lib/defaults'
 import { gapToScaleFactor } from '@/lib/utils'
 
 interface ShapeViewerProps {
@@ -58,7 +58,7 @@ export default function ShapeViewer({
   }
 
   const { radius } = calculateBoundingSphere()
-  const fieldOfView = 0.4
+  const fieldOfView = FIELD_OF_VIEW
   const safetyFactor = 1.0
 
   const updateCameraDistance = useCallback(() => {

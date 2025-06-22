@@ -8,6 +8,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Slider } from '@/components/ui/slider'
+import { GAP_SIZE } from '@/lib/defaults'
 
 interface ShapeSidebarProps {
   shapes: string[]
@@ -28,8 +30,8 @@ export default function ShapeSidebar({
     router.push(`/${value}`)
   }
 
-  const handleGapChange = (value: string) => {
-    onGapChange(Number(value))
+  const handleGapChange = (value: number[]) => {
+    onGapChange(value[0])
   }
 
   const formatShapeName = (name: string) => {
@@ -52,19 +54,20 @@ export default function ShapeSidebar({
           ))}
         </SelectContent>
       </Select>
-      <div className='mt-4'>
-        <Select value={gap.toString()} onValueChange={handleGapChange}>
-          <SelectTrigger className='w-full'>
-            <SelectValue placeholder='Gap'>{gap}</SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            {Array.from({ length: 20 }, (_, i) => i + 1).map(v => (
-              <SelectItem key={v} value={v.toString()}>
-                {v}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      <div className='mt-4 space-y-2'>
+        <div className='flex items-center justify-between'>
+          <span className='text-sm font-medium'>Gap</span>
+          <span className='text-sm text-muted-foreground'>{gap}</span>
+        </div>
+        <Slider
+          value={[gap]}
+          onValueChange={handleGapChange}
+          defaultValue={[GAP_SIZE]}
+          min={1}
+          max={20}
+          step={1}
+          className='w-full'
+        />
       </div>
     </aside>
   )

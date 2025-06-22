@@ -25,8 +25,6 @@ export default function ShapeViewer({
   const [foregroundColor, setForegroundColor] = useState('1 1 1')
   const [cameraDistance, setCameraDistance] = useState(0)
   const [dimensions, setDimensions] = useState({ width: 600, height: 600 })
-  const [initialGap] = useState(gapSize)
-  const initialScaleFactor = gapToScaleFactor(initialGap)
 
   const rgbToX3d = (rgbString: string): string => {
     const match = rgbString.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/)
@@ -113,25 +111,25 @@ export default function ShapeViewer({
     return () => window.removeEventListener('resize', updateCameraDistance)
   }, [updateCameraDistance])
 
-  const geometryContent = useMemo(
-    () =>
-      faces
-        .map(face => {
-          const center = calculateFaceCenter(face)
-          const faceCoordinates = face
-            .map(vertexIndex => {
-              const vertex = vertices[vertexIndex]
-              const scaledVertex = [
-                center[0] + (vertex[0] - center[0]) * initialScaleFactor,
-                center[1] + (vertex[1] - center[1]) * initialScaleFactor,
-                center[2] + (vertex[2] - center[2]) * initialScaleFactor,
-              ]
-              return scaledVertex.join(' ')
-            })
-            .join(', ')
-          const faceIndices = [...Array(face.length).keys(), -1].join(' ')
+  const geometryContent = useMemo(() => {
+    const scaleFactor = gapToScaleFactor(gapSize)
+    return faces
+      .map(face => {
+        const center = calculateFaceCenter(face)
+        const faceCoordinates = face
+          .map(vertexIndex => {
+            const vertex = vertices[vertexIndex]
+            const scaledVertex = [
+              center[0] + (vertex[0] - center[0]) * scaleFactor,
+              center[1] + (vertex[1] - center[1]) * scaleFactor,
+              center[2] + (vertex[2] - center[2]) * scaleFactor,
+            ]
+            return scaledVertex.join(' ')
+          })
+          .join(', ')
+        const faceIndices = [...Array(face.length).keys(), -1].join(' ')
 
-          return `
+        return `
           <shape>
             <appearance>
               <material emissivecolor="${foregroundColor}" diffusecolor="0 0 0"></material>
@@ -141,49 +139,37 @@ export default function ShapeViewer({
             </indexedfaceset>
           </shape>
         `
-        })
-        .join(''),
-    [faces, calculateFaceCenter, vertices, initialScaleFactor, foregroundColor],
-  )
+      })
+      .join('')
+  }, [faces, calculateFaceCenter, vertices, gapSize, foregroundColor])
 
   useEffect(() => {
     if (!containerRef.current) return
 
-    containerRef.current.innerHTML = `
-      <x3d style='width: 100%; height: 100%; display: block;'>
-        <scene>
-          <viewpoint id='camera' orientation='0 1 0 0'></viewpoint>
-          ${geometryContent}
-        </scene>
-      </x3d>
-    `
+    const existingScene = containerRef.current.querySelector('scene')
 
-    if (window.x3dom && typeof window.x3dom.reload === 'function') {
-      window.x3dom.reload()
+    if (existingScene) {
+      const geometryGroup = existingScene.querySelector('#geometry-group')
+      if (geometryGroup) {
+        geometryGroup.innerHTML = geometryContent
+      }
+    } else {
+      containerRef.current.innerHTML = `
+        <x3d style='width: 100%; height: 100%; display: block;'>
+          <scene>
+            <viewpoint id='camera' orientation='0 1 0 0'></viewpoint>
+            <group id='geometry-group'>
+              ${geometryContent}
+            </group>
+          </scene>
+        </x3d>
+      `
+
+      if (window.x3dom && typeof window.x3dom.reload === 'function') {
+        window.x3dom.reload()
+      }
     }
   }, [geometryContent, shapeName])
-
-  useEffect(() => {
-    const coordinates = containerRef.current?.querySelectorAll('coordinate')
-    if (!coordinates) return
-    const scaleFactor = gapToScaleFactor(gapSize)
-    coordinates.forEach((coordEl, i) => {
-      const face = faces[i]
-      const center = calculateFaceCenter(face)
-      const faceCoordinates = face
-        .map(vertexIndex => {
-          const vertex = vertices[vertexIndex]
-          const scaledVertex = [
-            center[0] + (vertex[0] - center[0]) * scaleFactor,
-            center[1] + (vertex[1] - center[1]) * scaleFactor,
-            center[2] + (vertex[2] - center[2]) * scaleFactor,
-          ]
-          return scaledVertex.join(' ')
-        })
-        .join(', ')
-      ;(coordEl as HTMLElement).setAttribute('point', faceCoordinates)
-    })
-  }, [gapSize, faces, vertices, calculateFaceCenter])
 
   useEffect(() => {
     const x3dEl = containerRef.current?.querySelector(

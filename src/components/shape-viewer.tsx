@@ -10,14 +10,12 @@ interface ShapeViewerProps {
   faces: number[][]
   edges: number[][]
   gapSize?: number
-  viewType?: 'spacious' | 'cozy'
 }
 
 export default function ShapeViewer({
   vertices,
   faces,
   gapSize = GAP_SIZE,
-  viewType = 'spacious',
 }: ShapeViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [foregroundColor, setForegroundColor] = useState('1 1 1')
@@ -58,10 +56,8 @@ export default function ShapeViewer({
 
   const { radius } = calculateBoundingSphere()
   const fieldOfView = 0.785398
-  const safetyFactor = viewType === 'spacious' ? 1.2 : 1.0
+  const safetyFactor = 1.2
   const cameraDistance = (radius / Math.sin(fieldOfView / 2)) * safetyFactor
-  const [dynamicCameraDistance, setDynamicCameraDistance] =
-    useState(cameraDistance)
 
   const calculateFaceCenter = useCallback(
     (face: number[]) => {
@@ -78,31 +74,6 @@ export default function ShapeViewer({
     },
     [vertices],
   )
-
-  const calculateCurrentBounds = useCallback(() => {
-    const scaledVertices = faces.flatMap(face =>
-      face.map(vertexIndex => {
-        const vertex = vertices[vertexIndex]
-        const faceCenter = calculateFaceCenter(face)
-        return [
-          faceCenter[0] + (vertex[0] - faceCenter[0]) * scaleFactor,
-          faceCenter[1] + (vertex[1] - faceCenter[1]) * scaleFactor,
-          faceCenter[2] + (vertex[2] - faceCenter[2]) * scaleFactor,
-        ]
-      }),
-    )
-
-    const maxCoord = scaledVertices.reduce((max, vertex) => {
-      const absMax = Math.max(
-        Math.abs(vertex[0]),
-        Math.abs(vertex[1]),
-        Math.abs(vertex[2]),
-      )
-      return Math.max(max, absMax)
-    }, 0)
-
-    return maxCoord
-  }, [faces, vertices, gapSize, calculateFaceCenter])
 
   useEffect(() => {
     import('x3dom').then(() => {
@@ -125,32 +96,10 @@ export default function ShapeViewer({
     })
   }, [])
 
-  useEffect(() => {
-    if (viewType === 'cozy') {
-      const currentMaxRadius = calculateCurrentBounds()
-      const cozyPadding = 0.1
-      const fovRadians = fieldOfView
-      const halfFov = fovRadians / 2
-      const distanceNeeded =
-        (currentMaxRadius + cozyPadding) / Math.tan(halfFov)
-      setDynamicCameraDistance(distanceNeeded)
-    } else {
-      setDynamicCameraDistance(cameraDistance)
-    }
-  }, [
-    viewType,
-    vertices,
-    faces,
-    gapSize,
-    fieldOfView,
-    cameraDistance,
-    calculateCurrentBounds,
-  ])
-
   const x3dContent = `
     <x3d width="600px" height="600px" style="width: 100%; height: 100%; display: block;">
       <scene>
-        <viewpoint position="0 0 ${viewType === 'cozy' ? dynamicCameraDistance : cameraDistance}" orientation="0 1 0 0" fieldofview="${fieldOfView}"></viewpoint>
+        <viewpoint position="0 0 ${cameraDistance}" orientation="0 1 0 0" fieldofview="${fieldOfView}"></viewpoint>
         ${faces
           .map(face => {
             const center = calculateFaceCenter(face)

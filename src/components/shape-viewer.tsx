@@ -163,7 +163,9 @@ export default function ShapeViewer({
   }, [geometryContent, shapeName])
 
   useEffect(() => {
-    const x3dEl = containerRef.current?.querySelector('x3d') as X3DElement | null
+    const x3dEl = containerRef.current?.querySelector(
+      'x3d',
+    ) as X3DElement | null
     const viewpoint = x3dEl?.querySelector('#camera') as HTMLElement | null
     if (x3dEl) {
       x3dEl.setAttribute('width', `${dimensions.width}px`)

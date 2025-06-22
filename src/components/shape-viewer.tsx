@@ -137,6 +137,7 @@ export default function ShapeViewer({
       <div
         ref={containerRef}
         className='bg-background border border-border rounded-lg overflow-hidden'
+        style={{ width: 'min(100%, calc(100vh - 2rem))', aspectRatio: '1 / 1' }}
         dangerouslySetInnerHTML={{ __html: x3dContent }}
       />
     </div>

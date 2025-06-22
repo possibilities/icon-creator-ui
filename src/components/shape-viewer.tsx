@@ -58,7 +58,7 @@ export default function ShapeViewer({
   }
 
   const { radius } = calculateBoundingSphere()
-  const fieldOfView = 0.785398
+  const fieldOfView = 0.4
   const safetyFactor = 1.0
 
   const updateCameraDistance = useCallback(() => {

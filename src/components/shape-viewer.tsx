@@ -20,6 +20,7 @@ export default function ShapeViewer({
   const containerRef = useRef<HTMLDivElement>(null)
   const [foregroundColor, setForegroundColor] = useState('1 1 1')
   const [cameraDistance, setCameraDistance] = useState(0)
+  const [dimensions, setDimensions] = useState({ width: 600, height: 600 })
   const scaleFactor = gapToScaleFactor(gapSize)
 
   const rgbToX3d = (rgbString: string): string => {
@@ -62,6 +63,8 @@ export default function ShapeViewer({
   const updateCameraDistance = useCallback(() => {
     if (!containerRef.current) return
     const { width, height } = containerRef.current.getBoundingClientRect()
+    const size = Math.min(width, height)
+    setDimensions({ width: size, height: size })
     const aspect = width / height
     const horizontalFov = 2 * Math.atan(Math.tan(fieldOfView / 2) * aspect)
     const verticalDist = radius / Math.sin(fieldOfView / 2)
@@ -109,7 +112,7 @@ export default function ShapeViewer({
   }, [updateCameraDistance])
 
   const x3dContent = `
-    <x3d width="600px" height="600px" style="width: 100%; height: 100%; display: block;">
+    <x3d width="${dimensions.width}px" height="${dimensions.height}px" style="width: 100%; height: 100%; display: block;">
       <scene>
         <viewpoint position="0 0 ${cameraDistance}" orientation="0 1 0 0" fieldofview="${fieldOfView}"></viewpoint>
         ${faces
@@ -170,7 +173,7 @@ export default function ShapeViewer({
     <div className='w-full h-full flex items-center justify-center bg-background'>
       <div
         ref={containerRef}
-        className='bg-background border border-border rounded-lg overflow-hidden'
+        className='bg-background border border-border rounded-lg overflow-hidden w-full h-full'
       />
     </div>
   )

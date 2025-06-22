@@ -94,7 +94,7 @@ export default function ShapeViewer({
         }
       }
     })
-  }, [])
+  }, [vertices, faces])
 
   const x3dContent = `
     <x3d width="600px" height="600px" style="width: 100%; height: 100%; display: block;">

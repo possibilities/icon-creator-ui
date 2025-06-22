@@ -31,7 +31,7 @@ export default function RootLayout({
         />
         <link rel='stylesheet' href='/vendor/x3dom.css' />
       </head>
-      <body>
+      <body className='overflow-hidden'>
         <ThemeProvider>
           <div className='flex h-screen'>
             <div className='flex-1 ml-[25%]'>{children}</div>

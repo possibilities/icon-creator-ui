@@ -18,6 +18,7 @@ export default function ShapeViewer({
   gapSize = GAP_SIZE,
 }: ShapeViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null)
+  const parentRef = useRef<HTMLDivElement>(null)
   const [foregroundColor, setForegroundColor] = useState('1 1 1')
   const [cameraDistance, setCameraDistance] = useState(0)
   const [dimensions, setDimensions] = useState({ width: 600, height: 600 })
@@ -61,8 +62,8 @@ export default function ShapeViewer({
   const safetyFactor = 1.0
 
   const updateCameraDistance = useCallback(() => {
-    if (!containerRef.current) return
-    const { width, height } = containerRef.current.getBoundingClientRect()
+    if (!parentRef.current) return
+    const { width, height } = parentRef.current.getBoundingClientRect()
     const size = Math.min(width, height)
     setDimensions({ width: size, height: size })
     const aspect = width / height
@@ -170,10 +171,17 @@ export default function ShapeViewer({
   ])
 
   return (
-    <div className='w-full h-full flex items-center justify-center bg-background'>
+    <div
+      ref={parentRef}
+      className='w-full h-full flex items-center justify-center bg-background'
+    >
       <div
         ref={containerRef}
-        className='bg-background border border-border rounded-lg overflow-hidden w-full h-full'
+        className='bg-background border border-border rounded-lg overflow-hidden'
+        style={{
+          width: `${dimensions.width}px`,
+          height: `${dimensions.height}px`,
+        }}
       />
     </div>
   )

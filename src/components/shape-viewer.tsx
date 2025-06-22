@@ -25,6 +25,8 @@ export default function ShapeViewer({
   const [foregroundColor, setForegroundColor] = useState('1 1 1')
   const [cameraDistance, setCameraDistance] = useState(0)
   const [dimensions, setDimensions] = useState({ width: 600, height: 600 })
+  const [animatedGap, setAnimatedGap] = useState(gapSize)
+  const animationRef = useRef<number | undefined>(undefined)
 
   const rgbToX3d = (rgbString: string): string => {
     const match = rgbString.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/)
@@ -111,8 +113,37 @@ export default function ShapeViewer({
     return () => window.removeEventListener('resize', updateCameraDistance)
   }, [updateCameraDistance])
 
+  useEffect(() => {
+    const startGap = animatedGap
+    const endGap = gapSize
+    const duration = 300
+    const startTime = performance.now()
+
+    const animate = (currentTime: number) => {
+      const elapsed = currentTime - startTime
+      const progress = Math.min(elapsed / duration, 1)
+
+      const easeOutCubic = 1 - Math.pow(1 - progress, 3)
+      const currentGap = startGap + (endGap - startGap) * easeOutCubic
+
+      setAnimatedGap(currentGap)
+
+      if (progress < 1) {
+        animationRef.current = requestAnimationFrame(animate)
+      }
+    }
+
+    animationRef.current = requestAnimationFrame(animate)
+
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current)
+      }
+    }
+  }, [gapSize])
+
   const geometryContent = useMemo(() => {
-    const scaleFactor = gapToScaleFactor(gapSize)
+    const scaleFactor = gapToScaleFactor(animatedGap)
     return faces
       .map(face => {
         const center = calculateFaceCenter(face)
@@ -141,7 +172,7 @@ export default function ShapeViewer({
         `
       })
       .join('')
-  }, [faces, calculateFaceCenter, vertices, gapSize, foregroundColor])
+  }, [faces, calculateFaceCenter, vertices, animatedGap, foregroundColor])
 
   useEffect(() => {
     if (!containerRef.current) return

@@ -112,6 +112,13 @@ export default function ShapeViewer({
     return () => window.removeEventListener('resize', updateCameraDistance)
   }, [updateCameraDistance])
 
+  useEffect(() => {
+    if (!parentRef.current) return
+    const observer = new ResizeObserver(() => updateCameraDistance())
+    observer.observe(parentRef.current)
+    return () => observer.disconnect()
+  }, [updateCameraDistance])
+
   const x3dContent = useMemo(
     () => `
     <x3d width="${dimensions.width}px" height="${dimensions.height}px" style="width: 100%; height: 100%; display: block;">

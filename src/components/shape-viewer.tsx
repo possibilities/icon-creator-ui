@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { GAP_SIZE, FIELD_OF_VIEW } from '@/lib/defaults'
 import { gapToScaleFactor } from '@/lib/utils'
 
@@ -112,7 +112,8 @@ export default function ShapeViewer({
     return () => window.removeEventListener('resize', updateCameraDistance)
   }, [updateCameraDistance])
 
-  const x3dContent = `
+  const x3dContent = useMemo(
+    () => `
     <x3d width="${dimensions.width}px" height="${dimensions.height}px" style="width: 100%; height: 100%; display: block;">
       <scene>
         <viewpoint position="0 0 ${cameraDistance}" orientation="0 1 0 0" fieldofview="${fieldOfView}"></viewpoint>
@@ -146,7 +147,19 @@ export default function ShapeViewer({
           .join('')}
       </scene>
     </x3d>
-  `
+  `,
+    [
+      dimensions.width,
+      dimensions.height,
+      cameraDistance,
+      fieldOfView,
+      faces,
+      calculateFaceCenter,
+      vertices,
+      scaleFactor,
+      foregroundColor,
+    ],
+  )
 
   useEffect(() => {
     if (!containerRef.current) return
@@ -158,18 +171,7 @@ export default function ShapeViewer({
         window.x3dom.reload()
       }
     }, 100)
-  }, [
-    shapeName,
-    vertices,
-    faces,
-    scaleFactor,
-    foregroundColor,
-    cameraDistance,
-    fieldOfView,
-    calculateFaceCenter,
-    x3dContent,
-    dimensions,
-  ])
+  }, [x3dContent, shapeName])
 
   return (
     <div

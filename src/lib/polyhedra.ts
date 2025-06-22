@@ -16,9 +16,7 @@ interface PolyhedronData {
 async function ensureRepoCloned(): Promise<void> {
   try {
     await fs.access(TMP_DIR)
-    console.log('Repository already exists at', TMP_DIR)
   } catch {
-    console.log('Cloning repository to', TMP_DIR)
     execSync(`git clone ${REPO_URL} ${TMP_DIR}`, { stdio: 'inherit' })
   }
 }

@@ -19,6 +19,8 @@ export default function ShapeViewer({
 }: ShapeViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const parentRef = useRef<HTMLDivElement>(null)
+  const x3dRef = useRef<HTMLElement | null>(null)
+  const viewpointRef = useRef<HTMLElement | null>(null)
   const [foregroundColor, setForegroundColor] = useState('1 1 1')
   const [cameraDistance, setCameraDistance] = useState(0)
   const [dimensions, setDimensions] = useState({ width: 600, height: 600 })
@@ -114,9 +116,9 @@ export default function ShapeViewer({
 
   const x3dContent = useMemo(
     () => `
-    <x3d width="${dimensions.width}px" height="${dimensions.height}px" style="width: 100%; height: 100%; display: block;">
+    <x3d style="width: 100%; height: 100%; display: block;">
       <scene>
-        <viewpoint position="0 0 ${cameraDistance}" orientation="0 1 0 0" fieldofview="${fieldOfView}"></viewpoint>
+        <viewpoint orientation="0 1 0 0" fieldofview="${fieldOfView}"></viewpoint>
         ${faces
           .map(face => {
             const center = calculateFaceCenter(face)
@@ -148,30 +150,36 @@ export default function ShapeViewer({
       </scene>
     </x3d>
   `,
-    [
-      dimensions.width,
-      dimensions.height,
-      cameraDistance,
-      fieldOfView,
-      faces,
-      calculateFaceCenter,
-      vertices,
-      scaleFactor,
-      foregroundColor,
-    ],
+    [fieldOfView, faces, calculateFaceCenter, vertices, scaleFactor, foregroundColor],
   )
 
   useEffect(() => {
     if (!containerRef.current) return
 
     containerRef.current.innerHTML = x3dContent
+    x3dRef.current = containerRef.current.querySelector('x3d')
+    viewpointRef.current = containerRef.current.querySelector('viewpoint')
 
-    setTimeout(() => {
-      if (window.x3dom && typeof window.x3dom.reload === 'function') {
-        window.x3dom.reload()
-      }
-    }, 100)
+    if (window.x3dom && typeof window.x3dom.reload === 'function') {
+      window.x3dom.reload()
+    }
   }, [x3dContent, shapeName])
+
+  useEffect(() => {
+    if (!x3dRef.current) return
+
+    x3dRef.current.setAttribute('width', `${dimensions.width}px`)
+    x3dRef.current.setAttribute('height', `${dimensions.height}px`)
+    if (viewpointRef.current) {
+      viewpointRef.current.setAttribute('position', `0 0 ${cameraDistance}`)
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const runtime = (x3dRef.current as any).runtime
+    if (runtime && typeof runtime.canvasResize === 'function') {
+      runtime.canvasResize()
+    }
+  }, [dimensions, cameraDistance])
 
   return (
     <div

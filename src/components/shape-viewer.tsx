@@ -1,8 +1,10 @@
 'use client'
 
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
+import { useTheme } from 'next-themes'
 import { GAP_SIZE, FIELD_OF_VIEW } from '@/lib/defaults'
 import { gapToScaleFactor } from '@/lib/polyhedra-client'
+import { cssVarToX3dColor } from '@/lib/color'
 
 interface ShapeViewerProps {
   shapeName: string
@@ -19,6 +21,7 @@ export default function ShapeViewer({
 }: ShapeViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const parentRef = useRef<HTMLDivElement>(null)
+  const { theme } = useTheme()
   interface X3DElement extends HTMLElement {
     runtime?: { resize?: () => void }
   }
@@ -30,17 +33,6 @@ export default function ShapeViewer({
   const isFirstRenderRef = useRef(true)
   const isDraggingRef = useRef(false)
   const lastMouseRef = useRef({ x: 0, y: 0 })
-
-  const rgbToX3d = (rgbString: string): string => {
-    const match = rgbString.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/)
-    if (!match) return '1 1 1'
-
-    const r = parseInt(match[1]) / 255
-    const g = parseInt(match[2]) / 255
-    const b = parseInt(match[3]) / 255
-
-    return `${r.toFixed(3)} ${g.toFixed(3)} ${b.toFixed(3)}`
-  }
 
   const calculateBoundingSphere = () => {
     const centroid = vertices.reduce(
@@ -99,22 +91,20 @@ export default function ShapeViewer({
   useEffect(() => {
     updateCameraDistance()
 
-    const computedStyle = getComputedStyle(document.documentElement)
-    const foreground = computedStyle.getPropertyValue('--foreground').trim()
+    let cancelled = false
 
-    if (foreground) {
-      const tempDiv = document.createElement('div')
-      tempDiv.style.color = `oklch(${foreground})`
-      document.body.appendChild(tempDiv)
-      const rgbColor = getComputedStyle(tempDiv).color
-      document.body.removeChild(tempDiv)
-
-      setForegroundColor(rgbToX3d(rgbColor))
-    }
+    cssVarToX3dColor('--foreground').then(x3dColor => {
+      if (!cancelled) {
+        setForegroundColor(x3dColor)
+      }
+    })
 
     window.addEventListener('resize', updateCameraDistance)
-    return () => window.removeEventListener('resize', updateCameraDistance)
-  }, [updateCameraDistance])
+    return () => {
+      cancelled = true
+      window.removeEventListener('resize', updateCameraDistance)
+    }
+  }, [updateCameraDistance, theme])
 
   useEffect(() => {
     if (isFirstRenderRef.current) {

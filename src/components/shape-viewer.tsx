@@ -28,6 +28,8 @@ export default function ShapeViewer({
   const [animatedGap, setAnimatedGap] = useState(gapSize)
   const animationRef = useRef<number | undefined>(undefined)
   const isFirstRenderRef = useRef(true)
+  const isDraggingRef = useRef(false)
+  const lastMouseRef = useRef({ x: 0, y: 0 })
 
   const rgbToX3d = (rgbString: string): string => {
     const match = rgbString.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/)
@@ -234,6 +236,34 @@ export default function ShapeViewer({
         const canvas = x3dElement.querySelector('canvas') as HTMLCanvasElement
         if (canvas) {
           canvas.addEventListener('wheel', preventWheel, { passive: false })
+
+          const handleMouseDown = (e: MouseEvent) => {
+            if (e.button === 0) {
+              isDraggingRef.current = true
+              lastMouseRef.current = { x: e.clientX, y: e.clientY }
+              e.preventDefault()
+            }
+          }
+
+          const handleMouseMove = (e: MouseEvent) => {
+            if (!isDraggingRef.current) return
+
+            lastMouseRef.current = { x: e.clientX, y: e.clientY }
+          }
+
+          const handleMouseUp = () => {
+            isDraggingRef.current = false
+          }
+
+          canvas.addEventListener('mousedown', handleMouseDown)
+          window.addEventListener('mousemove', handleMouseMove)
+          window.addEventListener('mouseup', handleMouseUp)
+
+          return () => {
+            canvas.removeEventListener('mousedown', handleMouseDown)
+            window.removeEventListener('mousemove', handleMouseMove)
+            window.removeEventListener('mouseup', handleMouseUp)
+          }
         }
       }
     }

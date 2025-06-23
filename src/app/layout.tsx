@@ -4,6 +4,7 @@ import { ThemeProvider } from '@/lib/theme-provider'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import './globals.css'
 import './debug.css'
+import './x3dom.css'
 
 export const metadata: Metadata = {
   title: 'Icon Creator',
@@ -30,7 +31,6 @@ export default function RootLayout({
           href='https://fonts.googleapis.com/css2?family=Geist+Mono:wght@100..900&display=optional'
           rel='stylesheet'
         />
-        <link rel='stylesheet' href='/vendor/x3dom.css' />
       </head>
       <body>
         <ThemeProvider>

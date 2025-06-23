@@ -198,12 +198,12 @@ export default function ShapeViewer({
       containerRef.current.innerHTML = `
         <x3d
           style='width: 100%; height: 100%; display: block;'
-          disabletouch='true'
           disablekeys='true'
           disablerightdrag='true'
           disablemiddledrag='true'
           disabledoubleclick='true'
           disablecontextmenu='true'
+          disablewheel='true'
         >
           <scene>
             <navigationinfo type='examine'></navigationinfo>
@@ -217,6 +217,24 @@ export default function ShapeViewer({
 
       if (window.x3dom && typeof window.x3dom.reload === 'function') {
         window.x3dom.reload()
+      }
+
+      const x3dElement = containerRef.current.querySelector(
+        'x3d',
+      ) as HTMLElement
+      if (x3dElement) {
+        const preventWheel = (e: Event) => {
+          e.preventDefault()
+          e.stopPropagation()
+          return false
+        }
+
+        x3dElement.addEventListener('wheel', preventWheel, { passive: false })
+
+        const canvas = x3dElement.querySelector('canvas') as HTMLCanvasElement
+        if (canvas) {
+          canvas.addEventListener('wheel', preventWheel, { passive: false })
+        }
       }
     }
   }, [geometryContent, shapeName])

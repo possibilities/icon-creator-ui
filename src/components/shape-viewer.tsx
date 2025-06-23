@@ -12,6 +12,9 @@ interface ShapeViewerProps {
   vertices: number[][]
   faces: number[][]
   gapSize?: number
+  pitch?: number
+  yaw?: number
+  roll?: number
 }
 
 export default function ShapeViewer({
@@ -19,6 +22,9 @@ export default function ShapeViewer({
   vertices,
   faces,
   gapSize = GAP_SIZE,
+  pitch = 0,
+  yaw = 0,
+  roll = 0,
 }: ShapeViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const parentRef = useRef<HTMLDivElement>(null)
@@ -312,9 +318,15 @@ export default function ShapeViewer({
           <scene>
             <navigationinfo type='none' transitionType='"TELEPORT"' transitionTime='0'></navigationinfo>
             <viewpoint id='camera' orientation='0 1 0 0'></viewpoint>
-            <group id='geometry-group'>
-              ${geometryContent}
-            </group>
+            <transform rotation='1 0 0 ${(pitch * Math.PI) / 180}'>
+              <transform rotation='0 1 0 ${(yaw * Math.PI) / 180}'>
+                <transform rotation='0 0 1 ${(roll * Math.PI) / 180}'>
+                  <group id='geometry-group'>
+                    ${geometryContent}
+                  </group>
+                </transform>
+              </transform>
+            </transform>
           </scene>
         </x3d>
       `
@@ -346,7 +358,7 @@ export default function ShapeViewer({
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shapeName])
+  }, [shapeName, pitch, yaw, roll])
 
   useEffect(() => {
     if (!containerRef.current) return
@@ -360,6 +372,17 @@ export default function ShapeViewer({
       }
     }
   }, [geometryContent])
+
+  useEffect(() => {
+    if (!containerRef.current) return
+
+    const transforms = containerRef.current.querySelectorAll('transform')
+    if (transforms.length >= 3) {
+      transforms[0].setAttribute('rotation', `1 0 0 ${(pitch * Math.PI) / 180}`)
+      transforms[1].setAttribute('rotation', `0 1 0 ${(yaw * Math.PI) / 180}`)
+      transforms[2].setAttribute('rotation', `0 0 1 ${(roll * Math.PI) / 180}`)
+    }
+  }, [pitch, yaw, roll])
 
   useEffect(() => {
     const x3dEl = containerRef.current?.querySelector(

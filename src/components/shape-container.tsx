@@ -19,10 +19,23 @@ export default function ShapeContainer({
   faces,
 }: ShapeContainerProps) {
   const [gap, setGap] = useState(GAP_SIZE)
+  const [pitch, setPitch] = useState(0)
+  const [yaw, setYaw] = useState(0)
+  const [roll, setRoll] = useState(0)
 
   return (
     <>
-      <ShapeSidebar shapes={shapes} gap={gap} onGapChange={setGap} />
+      <ShapeSidebar
+        shapes={shapes}
+        gap={gap}
+        onGapChange={setGap}
+        pitch={pitch}
+        onPitchChange={setPitch}
+        yaw={yaw}
+        onYawChange={setYaw}
+        roll={roll}
+        onRollChange={setRoll}
+      />
       <div className='w-full h-screen'>
         <ShapeViewer
           key={shapeName}
@@ -30,6 +43,9 @@ export default function ShapeContainer({
           vertices={vertices}
           faces={faces}
           gapSize={gap}
+          pitch={pitch}
+          yaw={yaw}
+          roll={roll}
         />
       </div>
     </>

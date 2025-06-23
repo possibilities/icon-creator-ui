@@ -15,12 +15,24 @@ interface ShapeSidebarProps {
   shapes: string[]
   gap: number
   onGapChange: (gap: number) => void
+  pitch: number
+  onPitchChange: (pitch: number) => void
+  yaw: number
+  onYawChange: (yaw: number) => void
+  roll: number
+  onRollChange: (roll: number) => void
 }
 
 export default function ShapeSidebar({
   shapes,
   gap,
   onGapChange,
+  pitch,
+  onPitchChange,
+  yaw,
+  onYawChange,
+  roll,
+  onRollChange,
 }: ShapeSidebarProps) {
   const router = useRouter()
   const params = useParams()
@@ -54,28 +66,88 @@ export default function ShapeSidebar({
           ))}
         </SelectContent>
       </Select>
-      <div className='mt-6 space-y-3'>
-        <div className='flex items-center justify-between'>
-          <label className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'>
-            Face Separation
-          </label>
-          <span className='text-sm font-mono text-muted-foreground bg-muted px-2 py-0.5 rounded'>
-            {gap}
-          </span>
-        </div>
-        <div className='relative pt-1'>
+      <div className='mt-6 space-y-6'>
+        <div className='space-y-3'>
+          <div className='flex items-center justify-between'>
+            <label className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'>
+              Look Up/Down
+            </label>
+            <span className='text-sm font-mono text-muted-foreground bg-muted px-2 py-0.5 rounded'>
+              {pitch}°
+            </span>
+          </div>
           <Slider
-            value={[gap]}
-            onValueChange={handleGapChange}
-            defaultValue={[GAP_SIZE]}
-            min={1}
-            max={20}
+            value={[pitch]}
+            onValueChange={value => onPitchChange(value[0])}
+            defaultValue={[0]}
+            min={-180}
+            max={180}
             step={1}
             className='w-full'
           />
-          <div className='flex justify-between mt-4'>
-            <span className='text-xs text-muted-foreground'>Compact</span>
-            <span className='text-xs text-muted-foreground'>Exploded</span>
+        </div>
+        <div className='space-y-3'>
+          <div className='flex items-center justify-between'>
+            <label className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'>
+              Turn Left/Right
+            </label>
+            <span className='text-sm font-mono text-muted-foreground bg-muted px-2 py-0.5 rounded'>
+              {yaw}°
+            </span>
+          </div>
+          <Slider
+            value={[yaw]}
+            onValueChange={value => onYawChange(value[0])}
+            defaultValue={[0]}
+            min={-180}
+            max={180}
+            step={1}
+            className='w-full'
+          />
+        </div>
+        <div className='space-y-3'>
+          <div className='flex items-center justify-between'>
+            <label className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'>
+              Tilt Sideways
+            </label>
+            <span className='text-sm font-mono text-muted-foreground bg-muted px-2 py-0.5 rounded'>
+              {roll}°
+            </span>
+          </div>
+          <Slider
+            value={[roll]}
+            onValueChange={value => onRollChange(value[0])}
+            defaultValue={[0]}
+            min={-180}
+            max={180}
+            step={1}
+            className='w-full'
+          />
+        </div>
+        <hr className='my-6 border-border' />
+        <div className='space-y-3'>
+          <div className='flex items-center justify-between'>
+            <label className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'>
+              Face Separation
+            </label>
+            <span className='text-sm font-mono text-muted-foreground bg-muted px-2 py-0.5 rounded'>
+              {gap}
+            </span>
+          </div>
+          <div className='relative pt-1'>
+            <Slider
+              value={[gap]}
+              onValueChange={handleGapChange}
+              defaultValue={[GAP_SIZE]}
+              min={1}
+              max={20}
+              step={1}
+              className='w-full'
+            />
+            <div className='flex justify-between mt-4'>
+              <span className='text-xs text-muted-foreground'>Compact</span>
+              <span className='text-xs text-muted-foreground'>Exploded</span>
+            </div>
           </div>
         </div>
       </div>

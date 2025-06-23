@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import ShapeSidebar from './shape-sidebar'
 import ShapeViewer from './shape-viewer'
-import { GAP_SIZE } from '@/lib/defaults'
+import { GAP_SIZE, FOV_DEFAULT } from '@/lib/defaults'
 
 interface ShapeContainerProps {
   shapes: string[]
@@ -22,6 +22,7 @@ export default function ShapeContainer({
   const [pitch, setPitch] = useState(0)
   const [yaw, setYaw] = useState(0)
   const [roll, setRoll] = useState(0)
+  const [fov, setFov] = useState(FOV_DEFAULT)
 
   return (
     <>
@@ -35,6 +36,8 @@ export default function ShapeContainer({
         onYawChange={setYaw}
         roll={roll}
         onRollChange={setRoll}
+        fov={fov}
+        onFovChange={setFov}
       />
       <div className='w-full h-screen'>
         <ShapeViewer
@@ -46,6 +49,7 @@ export default function ShapeContainer({
           pitch={pitch}
           yaw={yaw}
           roll={roll}
+          fov={fov}
         />
       </div>
     </>

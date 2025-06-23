@@ -21,6 +21,8 @@ interface ShapeSidebarProps {
   onYawChange: (yaw: number) => void
   roll: number
   onRollChange: (roll: number) => void
+  fov: number
+  onFovChange: (fov: number) => void
 }
 
 export default function ShapeSidebar({
@@ -33,6 +35,8 @@ export default function ShapeSidebar({
   onYawChange,
   roll,
   onRollChange,
+  fov,
+  onFovChange,
 }: ShapeSidebarProps) {
   const router = useRouter()
   const params = useParams()
@@ -147,6 +151,32 @@ export default function ShapeSidebar({
             <div className='flex justify-between mt-4'>
               <span className='text-xs text-muted-foreground'>Compact</span>
               <span className='text-xs text-muted-foreground'>Exploded</span>
+            </div>
+          </div>
+        </div>
+        <hr className='my-6 border-border' />
+        <div className='space-y-3'>
+          <div className='flex items-center justify-between'>
+            <label className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'>
+              Field of View
+            </label>
+            <span className='text-sm font-mono text-muted-foreground bg-muted px-2 py-0.5 rounded'>
+              {fov}°
+            </span>
+          </div>
+          <div className='relative pt-1'>
+            <Slider
+              value={[fov]}
+              onValueChange={value => onFovChange(value[0])}
+              defaultValue={[23]}
+              min={1}
+              max={40}
+              step={1}
+              className='w-full'
+            />
+            <div className='flex justify-between mt-4'>
+              <span className='text-xs text-muted-foreground'>Narrow</span>
+              <span className='text-xs text-muted-foreground'>Wide</span>
             </div>
           </div>
         </div>

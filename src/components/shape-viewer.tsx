@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { useTheme } from 'next-themes'
-import { GAP_SIZE, FIELD_OF_VIEW } from '@/lib/defaults'
+import { GAP_SIZE } from '@/lib/defaults'
 import { gapToScaleFactor } from '@/lib/polyhedra-client'
 import ClipperLib from 'clipper-lib'
 import { cssVarToX3dColor } from '@/lib/color'
@@ -15,6 +15,7 @@ interface ShapeViewerProps {
   pitch?: number
   yaw?: number
   roll?: number
+  fov?: number
 }
 
 export default function ShapeViewer({
@@ -25,6 +26,7 @@ export default function ShapeViewer({
   pitch = 0,
   yaw = 0,
   roll = 0,
+  fov = 23,
 }: ShapeViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const parentRef = useRef<HTMLDivElement>(null)
@@ -39,6 +41,7 @@ export default function ShapeViewer({
   const animationRef = useRef<number | undefined>(undefined)
   const isFirstRenderRef = useRef(true)
   const viewMatrixRef = useRef<string | null>(null)
+  const fieldOfView = (fov * Math.PI) / 180
 
   const calculateBoundingSphere = () => {
     const centroid = vertices.reduce(
@@ -63,7 +66,6 @@ export default function ShapeViewer({
   }
 
   const { radius } = calculateBoundingSphere()
-  const fieldOfView = FIELD_OF_VIEW
   const safetyFactor = 1.0
 
   const updateCameraDistance = useCallback(() => {
@@ -400,7 +402,7 @@ export default function ShapeViewer({
     if (x3dEl?.runtime && typeof x3dEl.runtime.resize === 'function') {
       x3dEl.runtime.resize()
     }
-  }, [dimensions, cameraDistance, fieldOfView])
+  }, [dimensions, cameraDistance, fieldOfView, fov])
 
   return (
     <div

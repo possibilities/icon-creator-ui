@@ -32,8 +32,6 @@ export default function ShapeViewer({
   const [animatedGap, setAnimatedGap] = useState(gapSize)
   const animationRef = useRef<number | undefined>(undefined)
   const isFirstRenderRef = useRef(true)
-  const isDraggingRef = useRef(false)
-  const lastMouseRef = useRef({ x: 0, y: 0 })
   const viewMatrixRef = useRef<string | null>(null)
 
   const calculateBoundingSphere = () => {
@@ -312,7 +310,7 @@ export default function ShapeViewer({
           disablewheel='true'
         >
           <scene>
-            <navigationinfo type='examine' transitionType='"TELEPORT"' transitionTime='0'></navigationinfo>
+            <navigationinfo type='none' transitionType='"TELEPORT"' transitionTime='0'></navigationinfo>
             <viewpoint id='camera' orientation='0 1 0 0'></viewpoint>
             <group id='geometry-group'>
               ${geometryContent}
@@ -341,44 +339,7 @@ export default function ShapeViewer({
         if (canvas) {
           canvas.addEventListener('wheel', preventWheel, { passive: false })
 
-          const handleMouseDown = (e: MouseEvent) => {
-            if (e.button === 0) {
-              isDraggingRef.current = true
-              lastMouseRef.current = { x: e.clientX, y: e.clientY }
-              e.preventDefault()
-            }
-          }
-
-          const handleMouseMove = (e: MouseEvent) => {
-            if (!isDraggingRef.current) return
-
-            lastMouseRef.current = { x: e.clientX, y: e.clientY }
-          }
-
-          const handleMouseUp = () => {
-            isDraggingRef.current = false
-          }
-
-          const handlePointerDown = (e: PointerEvent) => {
-            canvas.setPointerCapture(e.pointerId)
-          }
-
-          const handlePointerUp = (e: PointerEvent) => {
-            canvas.releasePointerCapture(e.pointerId)
-          }
-
-          canvas.addEventListener('mousedown', handleMouseDown)
-          window.addEventListener('mousemove', handleMouseMove)
-          window.addEventListener('mouseup', handleMouseUp)
-          canvas.addEventListener('pointerdown', handlePointerDown)
-          canvas.addEventListener('pointerup', handlePointerUp)
-
           return () => {
-            canvas.removeEventListener('mousedown', handleMouseDown)
-            window.removeEventListener('mousemove', handleMouseMove)
-            window.removeEventListener('mouseup', handleMouseUp)
-            canvas.removeEventListener('pointerdown', handlePointerDown)
-            canvas.removeEventListener('pointerup', handlePointerUp)
             canvas.removeEventListener('wheel', preventWheel)
           }
         }

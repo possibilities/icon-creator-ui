@@ -341,18 +341,66 @@ export default function ShapeViewer({
         if (canvas) {
           canvas.addEventListener('wheel', preventWheel, { passive: false })
 
+          const createModifiedMouseEvent = (
+            originalEvent: MouseEvent,
+            deltaX: number,
+            deltaY: number,
+          ) => {
+            const newEvent = new MouseEvent(originalEvent.type, {
+              bubbles: originalEvent.bubbles,
+              cancelable: originalEvent.cancelable,
+              view: originalEvent.view,
+              detail: originalEvent.detail,
+              screenX: originalEvent.screenX,
+              screenY: originalEvent.screenY,
+              clientX: lastMouseRef.current.x + deltaX,
+              clientY: lastMouseRef.current.y + deltaY,
+              ctrlKey: originalEvent.ctrlKey,
+              shiftKey: originalEvent.shiftKey,
+              altKey: originalEvent.altKey,
+              metaKey: originalEvent.metaKey,
+              button: originalEvent.button,
+              buttons: originalEvent.buttons,
+              relatedTarget: originalEvent.relatedTarget,
+            })
+            return newEvent
+          }
+
           const handleMouseDown = (e: MouseEvent) => {
             if (e.button === 0) {
               isDraggingRef.current = true
               lastMouseRef.current = { x: e.clientX, y: e.clientY }
-              e.preventDefault()
             }
           }
 
           const handleMouseMove = (e: MouseEvent) => {
-            if (!isDraggingRef.current) return
+            const deltaX = e.clientX - lastMouseRef.current.x
+            const deltaY = e.clientY - lastMouseRef.current.y
 
-            lastMouseRef.current = { x: e.clientX, y: e.clientY }
+            const modifiedDeltaX = deltaX
+            const modifiedDeltaY = 0
+
+            if (deltaY !== 0 && e.buttons > 0) {
+              e.preventDefault()
+              e.stopPropagation()
+
+              const modifiedEvent = createModifiedMouseEvent(
+                e,
+                modifiedDeltaX,
+                modifiedDeltaY,
+              )
+
+              lastMouseRef.current = {
+                x: lastMouseRef.current.x + modifiedDeltaX,
+                y: lastMouseRef.current.y + modifiedDeltaY,
+              }
+
+              setTimeout(() => {
+                canvas.dispatchEvent(modifiedEvent)
+              }, 0)
+            } else {
+              lastMouseRef.current = { x: e.clientX, y: e.clientY }
+            }
           }
 
           const handleMouseUp = () => {
@@ -367,15 +415,15 @@ export default function ShapeViewer({
             canvas.releasePointerCapture(e.pointerId)
           }
 
+          canvas.addEventListener('mousemove', handleMouseMove, true)
           canvas.addEventListener('mousedown', handleMouseDown)
-          window.addEventListener('mousemove', handleMouseMove)
           window.addEventListener('mouseup', handleMouseUp)
           canvas.addEventListener('pointerdown', handlePointerDown)
           canvas.addEventListener('pointerup', handlePointerUp)
 
           return () => {
+            canvas.removeEventListener('mousemove', handleMouseMove, true)
             canvas.removeEventListener('mousedown', handleMouseDown)
-            window.removeEventListener('mousemove', handleMouseMove)
             window.removeEventListener('mouseup', handleMouseUp)
             canvas.removeEventListener('pointerdown', handlePointerDown)
             canvas.removeEventListener('pointerup', handlePointerUp)

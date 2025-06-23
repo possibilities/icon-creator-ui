@@ -33,6 +33,7 @@ export default function ShapeViewer({
   const isFirstRenderRef = useRef(true)
   const isDraggingRef = useRef(false)
   const lastMouseRef = useRef({ x: 0, y: 0 })
+  const viewMatrixRef = useRef<string | null>(null)
 
   const calculateBoundingSphere = () => {
     const centroid = vertices.reduce(
@@ -90,21 +91,74 @@ export default function ShapeViewer({
 
   useEffect(() => {
     updateCameraDistance()
+    window.addEventListener('resize', updateCameraDistance)
+    return () => {
+      window.removeEventListener('resize', updateCameraDistance)
+    }
+  }, [updateCameraDistance])
 
+  useEffect(() => {
     let cancelled = false
+
+    const viewpoint = containerRef.current?.querySelector('#camera') as
+      | (HTMLElement & {
+          _x3domNode?: {
+            getCurrentTransform: () => { toString: () => string }
+            setViewMatrix: (matrix: unknown) => void
+          }
+        })
+      | null
+    if (viewpoint && viewpoint._x3domNode) {
+      const viewMatrix = viewpoint._x3domNode.getCurrentTransform()
+      if (viewMatrix) {
+        viewMatrixRef.current = viewMatrix.toString()
+      }
+    }
 
     cssVarToX3dColor('--foreground').then(x3dColor => {
       if (!cancelled) {
         setForegroundColor(x3dColor)
+
+        const materials =
+          containerRef.current?.querySelectorAll('.shape-material')
+        if (materials) {
+          materials.forEach(material => {
+            material.setAttribute('emissivecolor', x3dColor)
+          })
+        }
+
+        if (
+          viewMatrixRef.current &&
+          viewpoint &&
+          viewpoint._x3domNode &&
+          window.x3dom
+        ) {
+          setTimeout(() => {
+            const x3domFields = (
+              window.x3dom as {
+                fields?: {
+                  SFMatrix4f: new () => {
+                    setFromString: (str: string | null) => void
+                  }
+                }
+              }
+            ).fields
+            if (x3domFields && x3domFields.SFMatrix4f) {
+              const matrix = new x3domFields.SFMatrix4f()
+              matrix.setFromString(viewMatrixRef.current)
+              if (viewpoint._x3domNode) {
+                viewpoint._x3domNode.setViewMatrix(matrix)
+              }
+            }
+          }, 0)
+        }
       }
     })
 
-    window.addEventListener('resize', updateCameraDistance)
     return () => {
       cancelled = true
-      window.removeEventListener('resize', updateCameraDistance)
     }
-  }, [updateCameraDistance, theme])
+  }, [theme])
 
   useEffect(() => {
     if (isFirstRenderRef.current) {
@@ -161,7 +215,7 @@ export default function ShapeViewer({
         return `
           <shape>
             <appearance>
-              <material emissivecolor="${foregroundColor}" diffusecolor="0 0 0"></material>
+              <material class="shape-material" emissivecolor="${foregroundColor}" diffusecolor="0 0 0"></material>
             </appearance>
             <indexedfaceset solid="true" coordindex="${faceIndices}">
               <coordinate point="${faceCoordinates}"></coordinate>
@@ -177,16 +231,7 @@ export default function ShapeViewer({
 
     const existingScene = containerRef.current.querySelector('scene')
 
-    if (existingScene) {
-      const geometryGroup = existingScene.querySelector('#geometry-group')
-      if (geometryGroup) {
-        geometryGroup.innerHTML = geometryContent
-        const x3d = containerRef.current.querySelector('x3d') as X3DElement
-        if (x3d?.runtime && typeof x3d.runtime.resize === 'function') {
-          x3d.runtime.resize()
-        }
-      }
-    } else {
+    if (!existingScene) {
       containerRef.current.innerHTML = `
         <x3d
           style='width: 100%; height: 100%; display: block;'
@@ -257,7 +302,21 @@ export default function ShapeViewer({
         }
       }
     }
-  }, [geometryContent, shapeName])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shapeName])
+
+  useEffect(() => {
+    if (!containerRef.current) return
+
+    const geometryGroup = containerRef.current.querySelector('#geometry-group')
+    if (geometryGroup) {
+      geometryGroup.innerHTML = geometryContent
+      const x3d = containerRef.current.querySelector('x3d') as X3DElement
+      if (x3d?.runtime && typeof x3d.runtime.resize === 'function') {
+        x3d.runtime.resize()
+      }
+    }
+  }, [geometryContent])
 
   useEffect(() => {
     const x3dEl = containerRef.current?.querySelector(

@@ -196,8 +196,17 @@ export default function ShapeViewer({
       }
     } else {
       containerRef.current.innerHTML = `
-        <x3d style='width: 100%; height: 100%; display: block;'>
+        <x3d
+          style='width: 100%; height: 100%; display: block;'
+          disabletouch='true'
+          disablekeys='true'
+          disablerightdrag='true'
+          disablemiddledrag='true'
+          disabledoubleclick='true'
+          disablecontextmenu='true'
+        >
           <scene>
+            <navigationinfo type='examine'></navigationinfo>
             <viewpoint id='camera' orientation='0 1 0 0'></viewpoint>
             <group id='geometry-group'>
               ${geometryContent}

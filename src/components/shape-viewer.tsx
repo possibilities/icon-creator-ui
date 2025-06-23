@@ -27,6 +27,7 @@ export default function ShapeViewer({
   const [dimensions, setDimensions] = useState({ width: 600, height: 600 })
   const [animatedGap, setAnimatedGap] = useState(gapSize)
   const animationRef = useRef<number | undefined>(undefined)
+  const isFirstRenderRef = useRef(true)
 
   const rgbToX3d = (rgbString: string): string => {
     const match = rgbString.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/)
@@ -114,6 +115,11 @@ export default function ShapeViewer({
   }, [updateCameraDistance])
 
   useEffect(() => {
+    if (isFirstRenderRef.current) {
+      isFirstRenderRef.current = false
+      return
+    }
+
     const startGap = animatedGap
     const endGap = gapSize
     const duration = 300
@@ -140,7 +146,7 @@ export default function ShapeViewer({
         cancelAnimationFrame(animationRef.current)
       }
     }
-  }, [gapSize])
+  }, [gapSize, animatedGap])
 
   const geometryContent = useMemo(() => {
     const scaleFactor = gapToScaleFactor(animatedGap)
@@ -231,7 +237,7 @@ export default function ShapeViewer({
     >
       <div
         ref={containerRef}
-        className='bg-background overflow-hidden'
+        className='bg-background border border-border rounded-lg overflow-hidden'
         style={{
           width: `${dimensions.width}px`,
           height: `${dimensions.height}px`,

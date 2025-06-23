@@ -290,14 +290,27 @@ export default function ShapeViewer({
             isDraggingRef.current = false
           }
 
+          const handlePointerDown = (e: PointerEvent) => {
+            canvas.setPointerCapture(e.pointerId)
+          }
+
+          const handlePointerUp = (e: PointerEvent) => {
+            canvas.releasePointerCapture(e.pointerId)
+          }
+
           canvas.addEventListener('mousedown', handleMouseDown)
           window.addEventListener('mousemove', handleMouseMove)
           window.addEventListener('mouseup', handleMouseUp)
+          canvas.addEventListener('pointerdown', handlePointerDown)
+          canvas.addEventListener('pointerup', handlePointerUp)
 
           return () => {
             canvas.removeEventListener('mousedown', handleMouseDown)
             window.removeEventListener('mousemove', handleMouseMove)
             window.removeEventListener('mouseup', handleMouseUp)
+            canvas.removeEventListener('pointerdown', handlePointerDown)
+            canvas.removeEventListener('pointerup', handlePointerUp)
+            canvas.removeEventListener('wheel', preventWheel)
           }
         }
       }

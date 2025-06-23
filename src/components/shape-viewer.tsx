@@ -234,6 +234,23 @@ export default function ShapeViewer({
         const canvas = x3dElement.querySelector('canvas') as HTMLCanvasElement
         if (canvas) {
           canvas.addEventListener('wheel', preventWheel, { passive: false })
+
+          const handlePointerDown = (e: PointerEvent) => {
+            canvas.setPointerCapture(e.pointerId)
+          }
+
+          const handlePointerUp = (e: PointerEvent) => {
+            canvas.releasePointerCapture(e.pointerId)
+          }
+
+          canvas.addEventListener('pointerdown', handlePointerDown)
+          canvas.addEventListener('pointerup', handlePointerUp)
+
+          return () => {
+            canvas.removeEventListener('pointerdown', handlePointerDown)
+            canvas.removeEventListener('pointerup', handlePointerUp)
+            canvas.removeEventListener('wheel', preventWheel)
+          }
         }
       }
     }

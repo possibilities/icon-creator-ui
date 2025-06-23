@@ -19,18 +19,18 @@ export default function RootLayout({
   return (
     <html lang='en' suppressHydrationWarning>
       <head>
-      <link rel='preconnect' href='https://fonts.googleapis.com' />
-      <link
-        rel='preconnect'
-        href='https://fonts.gstatic.com'
-        crossOrigin='anonymous'
-      />
-      {/* See: https://chatgpt.com/c/681ca606-b550-8001-88c7-84fe99e7dcaf */}
-      {/* eslint-disable-next-line @next/next/no-page-custom-font */}
-      <link
-        href='https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&family=Fira+Code:wght@300..700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=optional'
-        rel='stylesheet'
-      />
+        <link rel='preconnect' href='https://fonts.googleapis.com' />
+        <link
+          rel='preconnect'
+          href='https://fonts.gstatic.com'
+          crossOrigin='anonymous'
+        />
+        {/* See: https://chatgpt.com/c/681ca606-b550-8001-88c7-84fe99e7dcaf */}
+        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
+        <link
+          href='https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&family=Fira+Code:wght@300..700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=optional'
+          rel='stylesheet'
+        />
       </head>
       <body>
         <ThemeProvider>

@@ -206,7 +206,7 @@ export default function ShapeViewer({
           disablewheel='true'
         >
           <scene>
-            <navigationinfo type='examine'></navigationinfo>
+            <navigationinfo type='examine' transitionType='"TELEPORT"' transitionTime='0'></navigationinfo>
             <viewpoint id='camera' orientation='0 1 0 0'></viewpoint>
             <group id='geometry-group'>
               ${geometryContent}

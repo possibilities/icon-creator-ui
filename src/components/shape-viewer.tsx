@@ -264,7 +264,7 @@ export default function ShapeViewer({
     >
       <div
         ref={containerRef}
-        className='bg-background border border-border rounded-lg overflow-hidden'
+        className='bg-background overflow-hidden'
         style={{
           width: `${dimensions.width}px`,
           height: `${dimensions.height}px`,

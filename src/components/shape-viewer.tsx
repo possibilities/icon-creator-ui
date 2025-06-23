@@ -134,21 +134,37 @@ export default function ShapeViewer({
           window.x3dom
         ) {
           setTimeout(() => {
-            const x3domFields = (
-              window.x3dom as {
-                fields?: {
-                  SFMatrix4f: new () => {
-                    setFromString: (str: string | null) => void
-                  }
+            try {
+              if (viewpoint._x3domNode && viewMatrixRef.current) {
+                const values = viewMatrixRef.current
+                  .split(/[\s,]+/)
+                  .map(v => parseFloat(v))
+                  .filter(v => !isNaN(v))
+
+                if (values.length === 16 && window.x3dom?.fields?.SFMatrix4f) {
+                  const matrix = new window.x3dom.fields.SFMatrix4f(
+                    values[0],
+                    values[1],
+                    values[2],
+                    values[3],
+                    values[4],
+                    values[5],
+                    values[6],
+                    values[7],
+                    values[8],
+                    values[9],
+                    values[10],
+                    values[11],
+                    values[12],
+                    values[13],
+                    values[14],
+                    values[15],
+                  )
+                  viewpoint._x3domNode.setViewMatrix(matrix)
                 }
               }
-            ).fields
-            if (x3domFields && x3domFields.SFMatrix4f) {
-              const matrix = new x3domFields.SFMatrix4f()
-              matrix.setFromString(viewMatrixRef.current)
-              if (viewpoint._x3domNode) {
-                viewpoint._x3domNode.setViewMatrix(matrix)
-              }
+            } catch (error) {
+              console.warn('Failed to restore view matrix:', error)
             }
           }, 0)
         }

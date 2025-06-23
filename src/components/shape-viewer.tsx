@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { useTheme } from 'next-themes'
 import { GAP_SIZE, FIELD_OF_VIEW } from '@/lib/defaults'
 import { gapToScaleFactor } from '@/lib/polyhedra-client'
+import ClipperLib from 'clipper-lib'
 import { cssVarToX3dColor } from '@/lib/color'
 
 interface ShapeViewerProps {
@@ -73,18 +74,81 @@ export default function ShapeViewer({
     setCameraDistance(Math.max(verticalDist, horizontalDist) * safetyFactor)
   }, [radius, fieldOfView, safetyFactor])
 
-  const calculateFaceCenter = useCallback(
-    (face: number[]) => {
-      const faceVertices = face.map(index => vertices[index])
-      const center = faceVertices.reduce(
-        (acc, vertex) => [
-          acc[0] + vertex[0] / faceVertices.length,
-          acc[1] + vertex[1] / faceVertices.length,
-          acc[2] + vertex[2] / faceVertices.length,
-        ],
-        [0, 0, 0],
+  const insetFace = useCallback(
+    (face: number[], gap: number) => {
+      if (face.length < 3) return face.map(idx => vertices[idx])
+
+      const sub = (a: number[], b: number[]) => [
+        a[0] - b[0],
+        a[1] - b[1],
+        a[2] - b[2],
+      ]
+      const add = (a: number[], b: number[]) => [
+        a[0] + b[0],
+        a[1] + b[1],
+        a[2] + b[2],
+      ]
+      const mul = (v: number[], s: number) => [v[0] * s, v[1] * s, v[2] * s]
+      const dot = (a: number[], b: number[]) =>
+        a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
+      const cross = (a: number[], b: number[]) => [
+        a[1] * b[2] - a[2] * b[1],
+        a[2] * b[0] - a[0] * b[2],
+        a[0] * b[1] - a[1] * b[0],
+      ]
+      const norm = (v: number[]) => {
+        const len = Math.sqrt(dot(v, v))
+        return len === 0 ? v : mul(v, 1 / len)
+      }
+
+      const p0 = vertices[face[0]]
+      const p1 = vertices[face[1]]
+      const p2 = vertices[face[2]]
+
+      const e1 = sub(p1, p0)
+      const e2 = sub(p2, p0)
+      const normal = norm(cross(e1, e2))
+      const u = norm(e1)
+      const v = norm(cross(normal, u))
+
+      const to2D = (p: number[]) => {
+        const vec = sub(p, p0)
+        return { X: dot(vec, u), Y: dot(vec, v) }
+      }
+      const from2D = (pt: { X: number; Y: number }) =>
+        add(p0, add(mul(u, pt.X), mul(v, pt.Y)))
+
+      const path = face.map(idx => to2D(vertices[idx]))
+
+      const edgeLens = path.map((pt, i) => {
+        const n = path[(i + 1) % path.length]
+        return Math.hypot(n.X - pt.X, n.Y - pt.Y)
+      })
+      const avgEdge = edgeLens.reduce((acc, l) => acc + l, 0) / edgeLens.length
+
+      const scaleFactor = gapToScaleFactor(gap)
+      const offset = avgEdge * (1 - scaleFactor)
+
+      const scale = 100000
+      const scaledPath = path.map(p => ({ X: p.X * scale, Y: p.Y * scale }))
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const co = new (ClipperLib as any).ClipperOffset()
+      co.AddPath(
+        scaledPath,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (ClipperLib as any).JoinType.jtMiter,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (ClipperLib as any).EndType.etClosedPolygon,
       )
-      return center
+      const res: { X: number; Y: number }[][] = []
+      co.Execute(res, -offset * scale)
+      const inset = (res[0] ?? scaledPath).map(p => ({
+        X: p.X / scale,
+        Y: p.Y / scale,
+      }))
+
+      return inset.map(from2D)
     },
     [vertices],
   )
@@ -211,22 +275,11 @@ export default function ShapeViewer({
   }, [gapSize, animatedGap])
 
   const geometryContent = useMemo(() => {
-    const scaleFactor = gapToScaleFactor(animatedGap)
     return faces
       .map(face => {
-        const center = calculateFaceCenter(face)
-        const faceCoordinates = face
-          .map(vertexIndex => {
-            const vertex = vertices[vertexIndex]
-            const scaledVertex = [
-              center[0] + (vertex[0] - center[0]) * scaleFactor,
-              center[1] + (vertex[1] - center[1]) * scaleFactor,
-              center[2] + (vertex[2] - center[2]) * scaleFactor,
-            ]
-            return scaledVertex.join(' ')
-          })
-          .join(', ')
-        const faceIndices = [...Array(face.length).keys(), -1].join(' ')
+        const inset = insetFace(face, animatedGap)
+        const faceCoordinates = inset.map(v => v.join(' ')).join(', ')
+        const faceIndices = [...Array(inset.length).keys(), -1].join(' ')
 
         return `
           <shape>
@@ -240,7 +293,7 @@ export default function ShapeViewer({
         `
       })
       .join('')
-  }, [faces, calculateFaceCenter, vertices, animatedGap, foregroundColor])
+  }, [faces, insetFace, animatedGap, foregroundColor])
 
   useEffect(() => {
     if (!containerRef.current) return

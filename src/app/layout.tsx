@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Script from 'next/script'
 import { ThemeProvider } from '@/lib/theme-provider'
+import { ThemeToggle } from '@/components/ui/theme-toggle'
 import './globals.css'
 import './debug.css'
 
@@ -35,6 +36,9 @@ export default function RootLayout({
         <ThemeProvider>
           <div className='flex h-screen'>
             <div className='ml-[25%] w-3/4 h-screen'>{children}</div>
+            <div className='fixed top-4 right-4 z-50'>
+              <ThemeToggle />
+            </div>
           </div>
         </ThemeProvider>
         <Script src='/vendor/x3dom.js' strategy='beforeInteractive' />

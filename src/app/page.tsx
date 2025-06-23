@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import { getAllPolyhedronNames } from '@/lib/polyhedra'
+import { getAllPolyhedronNames } from '@/lib/polyhedra-server'
 
 export default async function Home() {
   const polyhedra = await getAllPolyhedronNames()

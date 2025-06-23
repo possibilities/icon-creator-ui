@@ -1,4 +1,7 @@
-import { getAllPolyhedronNames, getPolyhedronData } from '@/lib/polyhedra'
+import {
+  getAllPolyhedronNames,
+  getPolyhedronData,
+} from '@/lib/polyhedra-server'
 import ShapeContainer from '@/components/shape-container'
 
 export const dynamicParams = false

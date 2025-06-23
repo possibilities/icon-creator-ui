@@ -54,20 +54,30 @@ export default function ShapeSidebar({
           ))}
         </SelectContent>
       </Select>
-      <div className='mt-4 space-y-2'>
+      <div className='mt-6 space-y-3'>
         <div className='flex items-center justify-between'>
-          <span className='text-sm font-medium'>Gap</span>
-          <span className='text-sm text-muted-foreground'>{gap}</span>
+          <label className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'>
+            Face Separation
+          </label>
+          <span className='text-sm font-mono text-muted-foreground bg-muted px-2 py-0.5 rounded'>
+            {gap}
+          </span>
         </div>
-        <Slider
-          value={[gap]}
-          onValueChange={handleGapChange}
-          defaultValue={[GAP_SIZE]}
-          min={1}
-          max={20}
-          step={1}
-          className='w-full'
-        />
+        <div className='relative pt-1'>
+          <Slider
+            value={[gap]}
+            onValueChange={handleGapChange}
+            defaultValue={[GAP_SIZE]}
+            min={1}
+            max={20}
+            step={1}
+            className='w-full'
+          />
+          <div className='flex justify-between mt-4'>
+            <span className='text-xs text-muted-foreground'>Compact</span>
+            <span className='text-xs text-muted-foreground'>Exploded</span>
+          </div>
+        </div>
       </div>
     </aside>
   )

@@ -19,12 +19,13 @@ declare module 'react' {
       > & {
         is?: string
         style?: React.CSSProperties
-        disabletouch?: string
+        disablewheel?: string
         disablekeys?: string
         disablerightdrag?: string
         disablemiddledrag?: string
         disabledoubleclick?: string
         disablecontextmenu?: string
+        disablewheel?: string
       }
       scene: React.DetailedHTMLProps<
         React.HTMLAttributes<HTMLElement>,

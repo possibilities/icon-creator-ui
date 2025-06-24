@@ -73,10 +73,10 @@ export default function ShapeSidebar({
       <div className='mt-6 space-y-6'>
         <div className='space-y-3'>
           <div className='flex items-center justify-between'>
-            <label className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'>
+            <label className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 truncate'>
               Look Up/Down
             </label>
-            <span className='text-sm font-mono text-muted-foreground bg-muted px-2 py-0.5 rounded'>
+            <span className='text-sm font-mono text-muted-foreground bg-muted px-2 py-0.5 rounded flex-shrink-0'>
               {pitch}°
             </span>
           </div>
@@ -92,10 +92,10 @@ export default function ShapeSidebar({
         </div>
         <div className='space-y-3'>
           <div className='flex items-center justify-between'>
-            <label className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'>
+            <label className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 truncate'>
               Turn Left/Right
             </label>
-            <span className='text-sm font-mono text-muted-foreground bg-muted px-2 py-0.5 rounded'>
+            <span className='text-sm font-mono text-muted-foreground bg-muted px-2 py-0.5 rounded flex-shrink-0'>
               {yaw}°
             </span>
           </div>
@@ -111,10 +111,10 @@ export default function ShapeSidebar({
         </div>
         <div className='space-y-3'>
           <div className='flex items-center justify-between'>
-            <label className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'>
+            <label className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 truncate'>
               Tilt Sideways
             </label>
-            <span className='text-sm font-mono text-muted-foreground bg-muted px-2 py-0.5 rounded'>
+            <span className='text-sm font-mono text-muted-foreground bg-muted px-2 py-0.5 rounded flex-shrink-0'>
               {roll}°
             </span>
           </div>
@@ -131,10 +131,10 @@ export default function ShapeSidebar({
         <hr className='my-6 border-border' />
         <div className='space-y-3'>
           <div className='flex items-center justify-between'>
-            <label className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'>
+            <label className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 truncate'>
               Field of View
             </label>
-            <span className='text-sm font-mono text-muted-foreground bg-muted px-2 py-0.5 rounded'>
+            <span className='text-sm font-mono text-muted-foreground bg-muted px-2 py-0.5 rounded flex-shrink-0'>
               {fov}°
             </span>
           </div>
@@ -157,10 +157,10 @@ export default function ShapeSidebar({
         <hr className='my-6 border-border' />
         <div className='space-y-3'>
           <div className='flex items-center justify-between'>
-            <label className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'>
+            <label className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 truncate'>
               Face Separation
             </label>
-            <span className='text-sm font-mono text-muted-foreground bg-muted px-2 py-0.5 rounded'>
+            <span className='text-sm font-mono text-muted-foreground bg-muted px-2 py-0.5 rounded flex-shrink-0'>
               {gap}
             </span>
           </div>

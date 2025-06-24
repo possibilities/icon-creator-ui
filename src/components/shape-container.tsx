@@ -4,12 +4,8 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import ShapeSidebar from './shape-sidebar'
 import ShapeViewer from './shape-viewer'
-import {
-  GAP_SIZE,
-  FOV_DEFAULT,
-  SPEED_DEFAULT,
-  URL_PARAMS,
-} from '@/lib/defaults'
+import { GAP, FOV, SPEED, PITCH, YAW, ROLL } from '@/lib/viewer-defaults'
+import { URL_PARAMS } from '@/lib/viewer-params'
 import { debounce } from '@/lib/url-helpers'
 
 interface ShapeContainerProps {
@@ -35,17 +31,15 @@ export default function ShapeContainer({
     return value ? Number(value) : defaultValue
   }
 
-  const [gap, setGap] = useState(() =>
-    getInitialValue(URL_PARAMS.GAP, GAP_SIZE),
+  const [gap, setGap] = useState(() => getInitialValue(URL_PARAMS.GAP, GAP))
+  const [pitch, setPitch] = useState(() =>
+    getInitialValue(URL_PARAMS.PITCH, PITCH),
   )
-  const [pitch, setPitch] = useState(() => getInitialValue(URL_PARAMS.PITCH, 0))
-  const [yaw, setYaw] = useState(() => getInitialValue(URL_PARAMS.YAW, 0))
-  const [roll, setRoll] = useState(() => getInitialValue(URL_PARAMS.ROLL, 0))
-  const [fov, setFov] = useState(() =>
-    getInitialValue(URL_PARAMS.FOV, FOV_DEFAULT),
-  )
+  const [yaw, setYaw] = useState(() => getInitialValue(URL_PARAMS.YAW, YAW))
+  const [roll, setRoll] = useState(() => getInitialValue(URL_PARAMS.ROLL, ROLL))
+  const [fov, setFov] = useState(() => getInitialValue(URL_PARAMS.FOV, FOV))
   const [speed, setSpeed] = useState(() =>
-    getInitialValue(URL_PARAMS.SPEED, SPEED_DEFAULT),
+    getInitialValue(URL_PARAMS.SPEED, SPEED),
   )
 
   const updateURL = useCallback(
@@ -60,11 +54,11 @@ export default function ShapeContainer({
           key !== URL_PARAMS.SPEED
         ) {
           params.delete(key)
-        } else if (value === GAP_SIZE && key === URL_PARAMS.GAP) {
+        } else if (value === GAP && key === URL_PARAMS.GAP) {
           params.delete(key)
-        } else if (value === FOV_DEFAULT && key === URL_PARAMS.FOV) {
+        } else if (value === FOV && key === URL_PARAMS.FOV) {
           params.delete(key)
-        } else if (value === SPEED_DEFAULT && key === URL_PARAMS.SPEED) {
+        } else if (value === SPEED && key === URL_PARAMS.SPEED) {
           params.delete(key)
         } else {
           params.set(key, value.toString())

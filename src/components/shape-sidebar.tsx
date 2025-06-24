@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/select'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { WideTargetSlider } from '@/components/wide-target-slider'
-import { GAP_SIZE } from '@/lib/defaults'
+import { GAP } from '@/lib/viewer-defaults'
 
 interface ShapeSidebarProps {
   shapes: string[]
@@ -199,7 +199,7 @@ export default function ShapeSidebar({
               <WideTargetSlider
                 value={[gap]}
                 onValueChange={handleGapChange}
-                defaultValue={[GAP_SIZE]}
+                defaultValue={[GAP]}
                 min={1}
                 max={20}
                 step={1}

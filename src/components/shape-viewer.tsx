@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { useTheme } from 'next-themes'
-import { GAP_SIZE } from '@/lib/defaults'
+import { GAP, FOV, SPEED, PITCH, YAW, ROLL } from '@/lib/viewer-defaults'
 import { gapToScaleFactor } from '@/lib/polyhedra-client'
 import ClipperLib from 'clipper-lib'
 import { cssVarToX3dColor } from '@/lib/color'
@@ -24,12 +24,12 @@ export default function ShapeViewer({
   shapeName,
   vertices,
   faces,
-  gapSize = GAP_SIZE,
-  pitch = 0,
-  yaw = 0,
-  roll = 0,
-  fov = 23,
-  speed = 30,
+  gapSize = GAP,
+  pitch = PITCH,
+  yaw = YAW,
+  roll = ROLL,
+  fov = FOV,
+  speed = SPEED,
   mode = 'scene',
 }: ShapeViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null)

@@ -1,7 +1,7 @@
 'use client'
 
 import { createContext, useContext, useState, ReactNode } from 'react'
-import { GAP_SIZE } from './defaults'
+import { GAP } from './viewer-defaults'
 
 interface GapContextType {
   gap: number
@@ -11,7 +11,7 @@ interface GapContextType {
 const GapContext = createContext<GapContextType | undefined>(undefined)
 
 export function GapProvider({ children }: { children: ReactNode }) {
-  const [gap, setGap] = useState(GAP_SIZE)
+  const [gap, setGap] = useState(GAP)
 
   return (
     <GapContext.Provider value={{ gap, setGap }}>

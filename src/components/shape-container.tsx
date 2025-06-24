@@ -90,49 +90,89 @@ export default function ShapeContainer({
   }, [gap, pitch, yaw, roll, fov, speed, debouncedUpdateURL])
 
   useEffect(() => {
+    const keysPressed = new Set<string>()
+    let animationId: number | null = null
+    let lastTime = 0
+
+    const SPEED_DEGREES_PER_SECOND = 60
+
+    const animate = (currentTime: number) => {
+      if (lastTime === 0) {
+        lastTime = currentTime
+      }
+
+      const deltaTime = (currentTime - lastTime) / 1000
+      lastTime = currentTime
+
+      const step = SPEED_DEGREES_PER_SECOND * deltaTime
+
+      if (keysPressed.has('K')) {
+        setPitch(prev => Math.max(-180, Math.min(180, prev - step)))
+      }
+      if (keysPressed.has('J')) {
+        setPitch(prev => Math.max(-180, Math.min(180, prev + step)))
+      }
+      if (keysPressed.has('H')) {
+        setYaw(prev => {
+          let newYaw = prev - step
+          if (newYaw < -180) newYaw += 360
+          return newYaw
+        })
+      }
+      if (keysPressed.has('L')) {
+        setYaw(prev => {
+          let newYaw = prev + step
+          if (newYaw > 180) newYaw -= 360
+          return newYaw
+        })
+      }
+      if (keysPressed.has('P')) {
+        setRoll(prev => Math.max(-180, Math.min(180, prev - step)))
+      }
+      if (keysPressed.has('N')) {
+        setRoll(prev => Math.max(-180, Math.min(180, prev + step)))
+      }
+
+      if (keysPressed.size > 0) {
+        animationId = requestAnimationFrame(animate)
+      }
+    }
+
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (!e.shiftKey) return
+      if (!e.shiftKey || e.repeat) return
 
-      const STEP = 1
+      const key = e.key.toUpperCase()
+      if (['K', 'J', 'H', 'L', 'P', 'N'].includes(key)) {
+        e.preventDefault()
+        keysPressed.add(key)
 
-      switch (e.key) {
-        case 'K':
-          e.preventDefault()
-          setPitch(prev => Math.max(-180, Math.min(180, prev - STEP)))
-          break
-        case 'J':
-          e.preventDefault()
-          setPitch(prev => Math.max(-180, Math.min(180, prev + STEP)))
-          break
-        case 'H':
-          e.preventDefault()
-          setYaw(prev => {
-            let newYaw = prev - STEP
-            if (newYaw < -180) newYaw += 360
-            return newYaw
-          })
-          break
-        case 'L':
-          e.preventDefault()
-          setYaw(prev => {
-            let newYaw = prev + STEP
-            if (newYaw > 180) newYaw -= 360
-            return newYaw
-          })
-          break
-        case 'P':
-          e.preventDefault()
-          setRoll(prev => Math.max(-180, Math.min(180, prev - STEP)))
-          break
-        case 'N':
-          e.preventDefault()
-          setRoll(prev => Math.max(-180, Math.min(180, prev + STEP)))
-          break
+        if (!animationId) {
+          lastTime = 0
+          animationId = requestAnimationFrame(animate)
+        }
+      }
+    }
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      const key = e.key.toUpperCase()
+      keysPressed.delete(key)
+
+      if (keysPressed.size === 0 && animationId) {
+        cancelAnimationFrame(animationId)
+        animationId = null
       }
     }
 
     window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
+    window.addEventListener('keyup', handleKeyUp)
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener('keyup', handleKeyUp)
+      if (animationId) {
+        cancelAnimationFrame(animationId)
+      }
+    }
   }, [])
 
   return (

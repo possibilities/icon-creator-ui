@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import {
   getAllPolyhedronNames,
   getPolyhedronData,
@@ -26,11 +27,13 @@ export default async function PolyhedronPage({ params }: PageProps) {
   const shapes = await getAllPolyhedronNames()
 
   return (
-    <ShapeContainer
-      shapes={shapes}
-      shapeName={resolvedParams.shape}
-      vertices={data!.vertices}
-      faces={data!.faces}
-    />
+    <Suspense fallback={null}>
+      <ShapeContainer
+        shapes={shapes}
+        shapeName={resolvedParams.shape}
+        vertices={data!.vertices}
+        faces={data!.faces}
+      />
+    </Suspense>
   )
 }

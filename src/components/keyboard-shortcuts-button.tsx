@@ -63,25 +63,33 @@ export function KeyboardShortcutsButton() {
                 <h3 className='font-semibold mb-2'>Shape Controls</h3>
                 <div className='space-y-1 text-sm'>
                   <div className='flex justify-between'>
-                    <span className='text-muted-foreground'>Decrease gap</span>
+                    <span className='text-muted-foreground'>
+                      Decrease face separation
+                    </span>
                     <kbd className='px-2 py-1 text-xs border rounded bg-muted'>
                       Shift + A
                     </kbd>
                   </div>
                   <div className='flex justify-between'>
-                    <span className='text-muted-foreground'>Increase gap</span>
+                    <span className='text-muted-foreground'>
+                      Increase face separation
+                    </span>
                     <kbd className='px-2 py-1 text-xs border rounded bg-muted'>
                       Shift + S
                     </kbd>
                   </div>
                   <div className='flex justify-between'>
-                    <span className='text-muted-foreground'>Decrease FOV</span>
+                    <span className='text-muted-foreground'>
+                      Narrow field of view
+                    </span>
                     <kbd className='px-2 py-1 text-xs border rounded bg-muted'>
                       Shift + Q
                     </kbd>
                   </div>
                   <div className='flex justify-between'>
-                    <span className='text-muted-foreground'>Increase FOV</span>
+                    <span className='text-muted-foreground'>
+                      Widen field of view
+                    </span>
                     <kbd className='px-2 py-1 text-xs border rounded bg-muted'>
                       Shift + W
                     </kbd>
@@ -92,49 +100,37 @@ export function KeyboardShortcutsButton() {
                 <h3 className='font-semibold mb-2'>Rotation Controls</h3>
                 <div className='space-y-1 text-sm'>
                   <div className='flex justify-between'>
-                    <span className='text-muted-foreground'>
-                      Rotate yaw left
-                    </span>
+                    <span className='text-muted-foreground'>Turn left</span>
                     <kbd className='px-2 py-1 text-xs border rounded bg-muted'>
                       Shift + H
                     </kbd>
                   </div>
                   <div className='flex justify-between'>
-                    <span className='text-muted-foreground'>
-                      Rotate yaw right
-                    </span>
+                    <span className='text-muted-foreground'>Turn right</span>
                     <kbd className='px-2 py-1 text-xs border rounded bg-muted'>
                       Shift + L
                     </kbd>
                   </div>
                   <div className='flex justify-between'>
-                    <span className='text-muted-foreground'>
-                      Rotate pitch down
-                    </span>
+                    <span className='text-muted-foreground'>Look down</span>
                     <kbd className='px-2 py-1 text-xs border rounded bg-muted'>
                       Shift + J
                     </kbd>
                   </div>
                   <div className='flex justify-between'>
-                    <span className='text-muted-foreground'>
-                      Rotate pitch up
-                    </span>
+                    <span className='text-muted-foreground'>Look up</span>
                     <kbd className='px-2 py-1 text-xs border rounded bg-muted'>
                       Shift + K
                     </kbd>
                   </div>
                   <div className='flex justify-between'>
-                    <span className='text-muted-foreground'>
-                      Rotate roll left
-                    </span>
+                    <span className='text-muted-foreground'>Tilt left</span>
                     <kbd className='px-2 py-1 text-xs border rounded bg-muted'>
                       Shift + N
                     </kbd>
                   </div>
                   <div className='flex justify-between'>
-                    <span className='text-muted-foreground'>
-                      Rotate roll right
-                    </span>
+                    <span className='text-muted-foreground'>Tilt right</span>
                     <kbd className='px-2 py-1 text-xs border rounded bg-muted'>
                       Shift + P
                     </kbd>

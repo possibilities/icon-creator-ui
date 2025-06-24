@@ -107,30 +107,30 @@ export default function ShapeContainer({
       const step = SPEED_DEGREES_PER_SECOND * deltaTime
 
       if (keysPressed.has('K')) {
-        setPitch(prev => Math.max(-180, Math.min(180, prev - step)))
+        setPitch(prev => Math.round(Math.max(-180, Math.min(180, prev - step))))
       }
       if (keysPressed.has('J')) {
-        setPitch(prev => Math.max(-180, Math.min(180, prev + step)))
+        setPitch(prev => Math.round(Math.max(-180, Math.min(180, prev + step))))
       }
       if (keysPressed.has('H')) {
         setYaw(prev => {
           let newYaw = prev - step
           if (newYaw < -180) newYaw += 360
-          return newYaw
+          return Math.round(newYaw)
         })
       }
       if (keysPressed.has('L')) {
         setYaw(prev => {
           let newYaw = prev + step
           if (newYaw > 180) newYaw -= 360
-          return newYaw
+          return Math.round(newYaw)
         })
       }
       if (keysPressed.has('P')) {
-        setRoll(prev => Math.max(-180, Math.min(180, prev - step)))
+        setRoll(prev => Math.round(Math.max(-180, Math.min(180, prev - step))))
       }
       if (keysPressed.has('N')) {
-        setRoll(prev => Math.max(-180, Math.min(180, prev + step)))
+        setRoll(prev => Math.round(Math.max(-180, Math.min(180, prev + step))))
       }
 
       if (keysPressed.size > 0) {

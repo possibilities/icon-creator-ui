@@ -16,6 +16,8 @@ interface ShapeViewerProps {
   yaw?: number
   roll?: number
   fov?: number
+  speed?: number
+  mode?: string
 }
 
 export default function ShapeViewer({
@@ -27,6 +29,8 @@ export default function ShapeViewer({
   yaw = 0,
   roll = 0,
   fov = 23,
+  speed = 30,
+  mode = 'scene',
 }: ShapeViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const parentRef = useRef<HTMLDivElement>(null)
@@ -42,6 +46,9 @@ export default function ShapeViewer({
   const isFirstRenderRef = useRef(true)
   const viewMatrixRef = useRef<string | null>(null)
   const fieldOfView = (fov * Math.PI) / 180
+  const [animatedYaw, setAnimatedYaw] = useState(yaw)
+  const motionAnimationRef = useRef<number | undefined>(undefined)
+  const lastTimeRef = useRef<number>(0)
 
   const calculateBoundingSphere = () => {
     const centroid = vertices.reduce(
@@ -321,7 +328,7 @@ export default function ShapeViewer({
             <navigationinfo type='none' transitionType='"TELEPORT"' transitionTime='0'></navigationinfo>
             <viewpoint id='camera' orientation='0 1 0 0'></viewpoint>
             <transform rotation='1 0 0 ${(pitch * Math.PI) / 180}'>
-              <transform rotation='0 1 0 ${(yaw * Math.PI) / 180}'>
+              <transform rotation='0 1 0 ${(animatedYaw * Math.PI) / 180}'>
                 <transform rotation='0 0 1 ${(roll * Math.PI) / 180}'>
                   <group id='geometry-group'>
                     ${geometryContent}
@@ -388,15 +395,53 @@ export default function ShapeViewer({
   }, [geometryContent])
 
   useEffect(() => {
+    if (motionAnimationRef.current) {
+      cancelAnimationFrame(motionAnimationRef.current)
+      motionAnimationRef.current = undefined
+    }
+
+    if (mode === 'motion' && speed > 0) {
+      lastTimeRef.current = performance.now()
+
+      const animate = (currentTime: number) => {
+        const deltaTime = (currentTime - lastTimeRef.current) / 1000
+        lastTimeRef.current = currentTime
+
+        setAnimatedYaw(prevYaw => {
+          let newYaw = prevYaw + speed * deltaTime
+          while (newYaw > 180) newYaw -= 360
+          while (newYaw < -180) newYaw += 360
+          return newYaw
+        })
+
+        motionAnimationRef.current = requestAnimationFrame(animate)
+      }
+
+      motionAnimationRef.current = requestAnimationFrame(animate)
+    } else {
+      setAnimatedYaw(yaw)
+    }
+
+    return () => {
+      if (motionAnimationRef.current) {
+        cancelAnimationFrame(motionAnimationRef.current)
+      }
+    }
+  }, [mode, speed, yaw])
+
+  useEffect(() => {
     if (!containerRef.current) return
 
     const transforms = containerRef.current.querySelectorAll('transform')
     if (transforms.length >= 3) {
       transforms[0].setAttribute('rotation', `1 0 0 ${(pitch * Math.PI) / 180}`)
-      transforms[1].setAttribute('rotation', `0 1 0 ${(yaw * Math.PI) / 180}`)
+      transforms[1].setAttribute(
+        'rotation',
+        `0 1 0 ${(animatedYaw * Math.PI) / 180}`,
+      )
       transforms[2].setAttribute('rotation', `0 0 1 ${(roll * Math.PI) / 180}`)
     }
-  }, [pitch, yaw, roll])
+  }, [pitch, animatedYaw, roll])
 
   useEffect(() => {
     const x3dEl = containerRef.current?.querySelector(

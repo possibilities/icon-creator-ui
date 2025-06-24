@@ -4,7 +4,12 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import ShapeSidebar from './shape-sidebar'
 import ShapeViewer from './shape-viewer'
-import { GAP_SIZE, FOV_DEFAULT, URL_PARAMS } from '@/lib/defaults'
+import {
+  GAP_SIZE,
+  FOV_DEFAULT,
+  SPEED_DEFAULT,
+  URL_PARAMS,
+} from '@/lib/defaults'
 import { debounce } from '@/lib/url-helpers'
 
 interface ShapeContainerProps {
@@ -39,17 +44,27 @@ export default function ShapeContainer({
   const [fov, setFov] = useState(() =>
     getInitialValue(URL_PARAMS.FOV, FOV_DEFAULT),
   )
+  const [speed, setSpeed] = useState(() =>
+    getInitialValue(URL_PARAMS.SPEED, SPEED_DEFAULT),
+  )
 
   const updateURL = useCallback(
     (updates: Record<string, number>) => {
       const params = new URLSearchParams(searchParams.toString())
 
       Object.entries(updates).forEach(([key, value]) => {
-        if (value === 0 && key !== URL_PARAMS.GAP && key !== URL_PARAMS.FOV) {
+        if (
+          value === 0 &&
+          key !== URL_PARAMS.GAP &&
+          key !== URL_PARAMS.FOV &&
+          key !== URL_PARAMS.SPEED
+        ) {
           params.delete(key)
         } else if (value === GAP_SIZE && key === URL_PARAMS.GAP) {
           params.delete(key)
         } else if (value === FOV_DEFAULT && key === URL_PARAMS.FOV) {
+          params.delete(key)
+        } else if (value === SPEED_DEFAULT && key === URL_PARAMS.SPEED) {
           params.delete(key)
         } else {
           params.set(key, value.toString())
@@ -76,8 +91,9 @@ export default function ShapeContainer({
       [URL_PARAMS.YAW]: yaw,
       [URL_PARAMS.ROLL]: roll,
       [URL_PARAMS.FOV]: fov,
+      [URL_PARAMS.SPEED]: speed,
     })
-  }, [gap, pitch, yaw, roll, fov, debouncedUpdateURL])
+  }, [gap, pitch, yaw, roll, fov, speed, debouncedUpdateURL])
 
   return (
     <>
@@ -94,6 +110,8 @@ export default function ShapeContainer({
         onRollChange={setRoll}
         fov={fov}
         onFovChange={setFov}
+        speed={speed}
+        onSpeedChange={setSpeed}
       />
       <div className='w-full h-screen'>
         <ShapeViewer
@@ -106,6 +124,8 @@ export default function ShapeContainer({
           yaw={yaw}
           roll={roll}
           fov={fov}
+          speed={speed}
+          mode={mode}
         />
       </div>
     </>

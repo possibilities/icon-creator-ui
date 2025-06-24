@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Slider } from '@/components/ui/slider'
+import { WideTargetSlider } from '@/components/wide-target-slider'
 import { GAP_SIZE } from '@/lib/defaults'
 
 interface ShapeSidebarProps {
@@ -80,7 +80,7 @@ export default function ShapeSidebar({
               {pitch}°
             </span>
           </div>
-          <Slider
+          <WideTargetSlider
             value={[pitch]}
             onValueChange={value => onPitchChange(value[0])}
             defaultValue={[0]}
@@ -99,7 +99,7 @@ export default function ShapeSidebar({
               {yaw}°
             </span>
           </div>
-          <Slider
+          <WideTargetSlider
             value={[yaw]}
             onValueChange={value => onYawChange(value[0])}
             defaultValue={[0]}
@@ -118,7 +118,7 @@ export default function ShapeSidebar({
               {roll}°
             </span>
           </div>
-          <Slider
+          <WideTargetSlider
             value={[roll]}
             onValueChange={value => onRollChange(value[0])}
             defaultValue={[0]}
@@ -139,7 +139,7 @@ export default function ShapeSidebar({
             </span>
           </div>
           <div className='relative pt-1'>
-            <Slider
+            <WideTargetSlider
               value={[fov]}
               onValueChange={value => onFovChange(value[0])}
               defaultValue={[23]}
@@ -165,7 +165,7 @@ export default function ShapeSidebar({
             </span>
           </div>
           <div className='relative pt-1'>
-            <Slider
+            <WideTargetSlider
               value={[gap]}
               onValueChange={handleGapChange}
               defaultValue={[GAP_SIZE]}

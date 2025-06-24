@@ -58,7 +58,7 @@ export function AnimationPauseSettings() {
   return (
     <div className='space-y-4'>
       <div className='flex items-center justify-between'>
-        <Label htmlFor='pause-toggle' className='text-sm text-muted-foreground'>
+        <Label htmlFor='pause-toggle' className='text-sm font-medium'>
           Pause Between Cycles
         </Label>
         <Switch
@@ -70,52 +70,52 @@ export function AnimationPauseSettings() {
 
       {pauseEnabled && (
         <>
-          <div className='flex flex-col gap-2'>
+          <div className='space-y-3'>
             <div className='flex items-center justify-between'>
-              <label className='text-sm text-muted-foreground'>
+              <label className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 truncate'>
                 Cycles Before Pause
               </label>
-              <span className='px-2 py-0.5 text-xs font-medium bg-muted text-muted-foreground rounded'>
+              <span className='text-sm font-mono text-muted-foreground bg-muted px-2 py-0.5 rounded flex-shrink-0'>
                 {localRepeatCount}
               </span>
             </div>
-            <WideTargetSlider
-              value={[localRepeatCount]}
-              onValueChange={([value]) => {
-                setLocalRepeatCount(value)
-                updateURL({ [URL_PARAMS.REPEAT_COUNT]: value })
-              }}
-              min={1}
-              max={10}
-              step={1}
-            />
-            <p className='text-xs text-muted-foreground'>
-              Number of rotations before pausing
-            </p>
+            <div className='relative pt-1'>
+              <WideTargetSlider
+                value={[localRepeatCount]}
+                onValueChange={([value]) => {
+                  setLocalRepeatCount(value)
+                  updateURL({ [URL_PARAMS.REPEAT_COUNT]: value })
+                }}
+                min={1}
+                max={10}
+                step={1}
+                className='w-full'
+              />
+            </div>
           </div>
 
-          <div className='flex flex-col gap-2'>
+          <div className='space-y-3'>
             <div className='flex items-center justify-between'>
-              <label className='text-sm text-muted-foreground'>
+              <label className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 truncate'>
                 Pause Duration
               </label>
-              <span className='px-2 py-0.5 text-xs font-medium bg-muted text-muted-foreground rounded'>
+              <span className='text-sm font-mono text-muted-foreground bg-muted px-2 py-0.5 rounded flex-shrink-0'>
                 {localPauseDuration.toFixed(1)}s
               </span>
             </div>
-            <WideTargetSlider
-              value={[localPauseDuration]}
-              onValueChange={([value]) => {
-                setLocalPauseDuration(value)
-                updateURL({ [URL_PARAMS.PAUSE_DURATION]: value })
-              }}
-              min={0.1}
-              max={10}
-              step={0.1}
-            />
-            <p className='text-xs text-muted-foreground'>
-              Seconds to pause between cycles
-            </p>
+            <div className='relative pt-1'>
+              <WideTargetSlider
+                value={[localPauseDuration]}
+                onValueChange={([value]) => {
+                  setLocalPauseDuration(value)
+                  updateURL({ [URL_PARAMS.PAUSE_DURATION]: value })
+                }}
+                min={0.1}
+                max={10}
+                step={0.1}
+                className='w-full'
+              />
+            </div>
           </div>
         </>
       )}

@@ -102,126 +102,154 @@ export function AnimationEasingSettings() {
 
       {/* Easing Strength - for ease-in-out, ease-in, ease-out */}
       {['ease-in-out', 'ease-in', 'ease-out'].includes(urlEasing) && (
-        <div className='flex flex-col gap-2'>
+        <div className='space-y-3'>
           <div className='flex items-center justify-between'>
-            <label className='text-sm text-muted-foreground'>
+            <label className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 truncate'>
               Easing Strength
             </label>
-            <span className='px-2 py-0.5 text-xs font-medium bg-muted text-muted-foreground rounded'>
+            <span className='text-sm font-mono text-muted-foreground bg-muted px-2 py-0.5 rounded flex-shrink-0'>
               {localEasingStrength.toFixed(1)}
             </span>
           </div>
-          <WideTargetSlider
-            value={[localEasingStrength]}
-            onValueChange={([value]) => {
-              setLocalEasingStrength(value)
-              updateURL(URL_PARAMS.EASING_STRENGTH, value)
-            }}
-            min={0.5}
-            max={3}
-            step={0.1}
-          />
-          <p className='text-xs text-muted-foreground'>
-            How dramatic the easing effect is
-          </p>
+          <div className='relative pt-1'>
+            <WideTargetSlider
+              value={[localEasingStrength]}
+              onValueChange={([value]) => {
+                setLocalEasingStrength(value)
+                updateURL(URL_PARAMS.EASING_STRENGTH, value)
+              }}
+              min={0.5}
+              max={3}
+              step={0.1}
+              className='w-full'
+            />
+            <div className='flex justify-between mt-4'>
+              <span className='text-xs text-muted-foreground'>Subtle</span>
+              <span className='text-xs text-muted-foreground'>Dramatic</span>
+            </div>
+          </div>
         </div>
       )}
 
       {/* Overshoot - for back, elastic, and spring */}
       {['back', 'elastic', 'spring'].includes(urlEasing) && (
-        <div className='flex flex-col gap-2'>
+        <div className='space-y-3'>
           <div className='flex items-center justify-between'>
-            <label className='text-sm text-muted-foreground'>Overshoot</label>
-            <span className='px-2 py-0.5 text-xs font-medium bg-muted text-muted-foreground rounded'>
+            <label className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 truncate'>
+              Overshoot
+            </label>
+            <span className='text-sm font-mono text-muted-foreground bg-muted px-2 py-0.5 rounded flex-shrink-0'>
               {localOvershoot.toFixed(0)}°
             </span>
           </div>
-          <WideTargetSlider
-            value={[localOvershoot]}
-            onValueChange={([value]) => {
-              setLocalOvershoot(value)
-              updateURL(URL_PARAMS.OVERSHOOT, value)
-            }}
-            min={0}
-            max={90}
-            step={5}
-          />
-          <p className='text-xs text-muted-foreground'>
-            Extra rotation before settling
-          </p>
+          <div className='relative pt-1'>
+            <WideTargetSlider
+              value={[localOvershoot]}
+              onValueChange={([value]) => {
+                setLocalOvershoot(value)
+                updateURL(URL_PARAMS.OVERSHOOT, value)
+              }}
+              min={0}
+              max={90}
+              step={5}
+              className='w-full'
+            />
+            <div className='flex justify-between mt-4'>
+              <span className='text-xs text-muted-foreground'>None</span>
+              <span className='text-xs text-muted-foreground'>Maximum</span>
+            </div>
+          </div>
         </div>
       )}
 
       {/* Bounces - for bounce and elastic */}
       {['bounce', 'elastic'].includes(urlEasing) && (
-        <div className='flex flex-col gap-2'>
+        <div className='space-y-3'>
           <div className='flex items-center justify-between'>
-            <label className='text-sm text-muted-foreground'>Bounces</label>
-            <span className='px-2 py-0.5 text-xs font-medium bg-muted text-muted-foreground rounded'>
+            <label className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 truncate'>
+              Bounces
+            </label>
+            <span className='text-sm font-mono text-muted-foreground bg-muted px-2 py-0.5 rounded flex-shrink-0'>
               {localBounces}
             </span>
           </div>
-          <WideTargetSlider
-            value={[localBounces]}
-            onValueChange={([value]) => {
-              setLocalBounces(value)
-              updateURL(URL_PARAMS.BOUNCES, value)
-            }}
-            min={1}
-            max={5}
-            step={1}
-          />
-          <p className='text-xs text-muted-foreground'>Number of bounces</p>
+          <div className='relative pt-1'>
+            <WideTargetSlider
+              value={[localBounces]}
+              onValueChange={([value]) => {
+                setLocalBounces(value)
+                updateURL(URL_PARAMS.BOUNCES, value)
+              }}
+              min={1}
+              max={5}
+              step={1}
+              className='w-full'
+            />
+            <div className='flex justify-between mt-4'>
+              <span className='text-xs text-muted-foreground'>Single</span>
+              <span className='text-xs text-muted-foreground'>Many</span>
+            </div>
+          </div>
         </div>
       )}
 
       {/* Steps - for stepped */}
       {urlEasing === 'stepped' && (
         <>
-          <div className='flex flex-col gap-2'>
+          <div className='space-y-3'>
             <div className='flex items-center justify-between'>
-              <label className='text-sm text-muted-foreground'>Steps</label>
-              <span className='px-2 py-0.5 text-xs font-medium bg-muted text-muted-foreground rounded'>
+              <label className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 truncate'>
+                Steps
+              </label>
+              <span className='text-sm font-mono text-muted-foreground bg-muted px-2 py-0.5 rounded flex-shrink-0'>
                 {localSteps}
               </span>
             </div>
-            <WideTargetSlider
-              value={[localSteps]}
-              onValueChange={([value]) => {
-                setLocalSteps(value)
-                updateURL(URL_PARAMS.STEPS, value)
-              }}
-              min={2}
-              max={16}
-              step={1}
-            />
-            <p className='text-xs text-muted-foreground'>
-              Number of discrete steps
-            </p>
+            <div className='relative pt-1'>
+              <WideTargetSlider
+                value={[localSteps]}
+                onValueChange={([value]) => {
+                  setLocalSteps(value)
+                  updateURL(URL_PARAMS.STEPS, value)
+                }}
+                min={2}
+                max={16}
+                step={1}
+                className='w-full'
+              />
+              <div className='flex justify-between mt-4'>
+                <span className='text-xs text-muted-foreground'>Few</span>
+                <span className='text-xs text-muted-foreground'>Many</span>
+              </div>
+            </div>
           </div>
 
-          <div className='flex flex-col gap-2'>
+          <div className='space-y-3'>
             <div className='flex items-center justify-between'>
-              <label className='text-sm text-muted-foreground'>
+              <label className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 truncate'>
                 Step Duration
               </label>
-              <span className='px-2 py-0.5 text-xs font-medium bg-muted text-muted-foreground rounded'>
+              <span className='text-sm font-mono text-muted-foreground bg-muted px-2 py-0.5 rounded flex-shrink-0'>
                 {(localStepDuration * 100).toFixed(0)}%
               </span>
             </div>
-            <WideTargetSlider
-              value={[localStepDuration]}
-              onValueChange={([value]) => {
-                setLocalStepDuration(value)
-                updateURL(URL_PARAMS.STEP_DURATION, value)
-              }}
-              min={0.1}
-              max={0.5}
-              step={0.05}
-            />
-            <p className='text-xs text-muted-foreground'>
-              How long each step takes
-            </p>
+            <div className='relative pt-1'>
+              <WideTargetSlider
+                value={[localStepDuration]}
+                onValueChange={([value]) => {
+                  setLocalStepDuration(value)
+                  updateURL(URL_PARAMS.STEP_DURATION, value)
+                }}
+                min={0.1}
+                max={0.5}
+                step={0.05}
+                className='w-full'
+              />
+              <div className='flex justify-between mt-4'>
+                <span className='text-xs text-muted-foreground'>Quick</span>
+                <span className='text-xs text-muted-foreground'>Slow</span>
+              </div>
+            </div>
           </div>
         </>
       )}

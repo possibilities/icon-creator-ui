@@ -92,26 +92,32 @@ export function AnimationRotationSettings() {
 
   return (
     <div className='space-y-4'>
-      <div className='flex flex-col gap-2'>
+      <div className='space-y-3'>
         <div className='flex items-center justify-between'>
-          <label className='text-sm text-muted-foreground'>
+          <label className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 truncate'>
             Rotation Speed
           </label>
-          <span className='px-2 py-0.5 text-xs font-medium bg-muted text-muted-foreground rounded'>
+          <span className='text-sm font-mono text-muted-foreground bg-muted px-2 py-0.5 rounded flex-shrink-0'>
             {localSpeed.toFixed(0)} RPM
           </span>
         </div>
-        <WideTargetSlider
-          value={[localSpeed]}
-          onValueChange={([value]) => {
-            setLocalSpeed(value)
-            updateURL({ [URL_PARAMS.SPEED]: value.toString() })
-          }}
-          min={1}
-          max={120}
-          step={1}
-        />
-        <p className='text-xs text-muted-foreground'>Revolutions per minute</p>
+        <div className='relative pt-1'>
+          <WideTargetSlider
+            value={[localSpeed]}
+            onValueChange={([value]) => {
+              setLocalSpeed(value)
+              updateURL({ [URL_PARAMS.SPEED]: value.toString() })
+            }}
+            min={1}
+            max={120}
+            step={1}
+            className='w-full'
+          />
+          <div className='flex justify-between mt-4'>
+            <span className='text-xs text-muted-foreground'>Slow</span>
+            <span className='text-xs text-muted-foreground'>Fast</span>
+          </div>
+        </div>
       </div>
 
       <div className='space-y-3'>
@@ -151,72 +157,77 @@ export function AnimationRotationSettings() {
 
       {localAxisType === 'custom' && (
         <div className='space-y-3 pl-6 border-l-2 border-muted'>
-          <div className='flex flex-col gap-2'>
+          <div className='space-y-3'>
             <div className='flex items-center justify-between'>
-              <label className='text-sm text-muted-foreground'>
+              <label className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 truncate'>
                 X Component
               </label>
-              <span className='px-2 py-0.5 text-xs font-medium bg-muted text-muted-foreground rounded'>
+              <span className='text-sm font-mono text-muted-foreground bg-muted px-2 py-0.5 rounded flex-shrink-0'>
                 {localAxisX.toFixed(2)}
               </span>
             </div>
-            <WideTargetSlider
-              value={[localAxisX]}
-              onValueChange={([value]) => {
-                setLocalAxisX(value)
-                handleCustomAxisChange('x', value)
-              }}
-              min={0}
-              max={1}
-              step={0.01}
-            />
+            <div className='relative pt-1'>
+              <WideTargetSlider
+                value={[localAxisX]}
+                onValueChange={([value]) => {
+                  setLocalAxisX(value)
+                  handleCustomAxisChange('x', value)
+                }}
+                min={0}
+                max={1}
+                step={0.01}
+                className='w-full'
+              />
+            </div>
           </div>
 
-          <div className='flex flex-col gap-2'>
+          <div className='space-y-3'>
             <div className='flex items-center justify-between'>
-              <label className='text-sm text-muted-foreground'>
+              <label className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 truncate'>
                 Y Component
               </label>
-              <span className='px-2 py-0.5 text-xs font-medium bg-muted text-muted-foreground rounded'>
+              <span className='text-sm font-mono text-muted-foreground bg-muted px-2 py-0.5 rounded flex-shrink-0'>
                 {localAxisY.toFixed(2)}
               </span>
             </div>
-            <WideTargetSlider
-              value={[localAxisY]}
-              onValueChange={([value]) => {
-                setLocalAxisY(value)
-                handleCustomAxisChange('y', value)
-              }}
-              min={0}
-              max={1}
-              step={0.01}
-            />
+            <div className='relative pt-1'>
+              <WideTargetSlider
+                value={[localAxisY]}
+                onValueChange={([value]) => {
+                  setLocalAxisY(value)
+                  handleCustomAxisChange('y', value)
+                }}
+                min={0}
+                max={1}
+                step={0.01}
+                className='w-full'
+              />
+            </div>
           </div>
 
-          <div className='flex flex-col gap-2'>
+          <div className='space-y-3'>
             <div className='flex items-center justify-between'>
-              <label className='text-sm text-muted-foreground'>
+              <label className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 truncate'>
                 Z Component
               </label>
-              <span className='px-2 py-0.5 text-xs font-medium bg-muted text-muted-foreground rounded'>
+              <span className='text-sm font-mono text-muted-foreground bg-muted px-2 py-0.5 rounded flex-shrink-0'>
                 {localAxisZ.toFixed(2)}
               </span>
             </div>
-            <WideTargetSlider
-              value={[localAxisZ]}
-              onValueChange={([value]) => {
-                setLocalAxisZ(value)
-                handleCustomAxisChange('z', value)
-              }}
-              min={0}
-              max={1}
-              step={0.01}
-            />
+            <div className='relative pt-1'>
+              <WideTargetSlider
+                value={[localAxisZ]}
+                onValueChange={([value]) => {
+                  setLocalAxisZ(value)
+                  handleCustomAxisChange('z', value)
+                }}
+                min={0}
+                max={1}
+                step={0.01}
+                className='w-full'
+              />
+            </div>
           </div>
-
-          <p className='text-xs text-muted-foreground'>
-            Define a custom rotation axis using X, Y, Z components
-          </p>
         </div>
       )}
 

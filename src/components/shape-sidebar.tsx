@@ -71,7 +71,7 @@ export default function ShapeSidebar({
   }
 
   return (
-    <aside className='fixed left-0 top-0 h-full w-1/4 border-r border-border bg-background p-4'>
+    <aside className='fixed left-0 top-0 h-full w-1/4 border-r border-border bg-background p-4 overflow-y-auto'>
       <Select value={currentShape} onValueChange={handleShapeChange}>
         <SelectTrigger className='w-full'>
           <SelectValue placeholder='Select a shape'>
@@ -111,15 +111,21 @@ export default function ShapeSidebar({
                 {pitch}°
               </span>
             </div>
-            <WideTargetSlider
-              value={[pitch]}
-              onValueChange={value => onPitchChange(value[0])}
-              defaultValue={[0]}
-              min={-180}
-              max={180}
-              step={1}
-              className='w-full'
-            />
+            <div className='relative pt-1'>
+              <WideTargetSlider
+                value={[pitch]}
+                onValueChange={value => onPitchChange(value[0])}
+                defaultValue={[0]}
+                min={-180}
+                max={180}
+                step={1}
+                className='w-full'
+              />
+              <div className='flex justify-between mt-4'>
+                <span className='text-xs text-muted-foreground'>Down</span>
+                <span className='text-xs text-muted-foreground'>Up</span>
+              </div>
+            </div>
           </div>
           <div className='space-y-3'>
             <div className='flex items-center justify-between'>
@@ -130,15 +136,21 @@ export default function ShapeSidebar({
                 {yaw}°
               </span>
             </div>
-            <WideTargetSlider
-              value={[yaw]}
-              onValueChange={value => onYawChange(value[0])}
-              defaultValue={[0]}
-              min={-180}
-              max={180}
-              step={1}
-              className='w-full'
-            />
+            <div className='relative pt-1'>
+              <WideTargetSlider
+                value={[yaw]}
+                onValueChange={value => onYawChange(value[0])}
+                defaultValue={[0]}
+                min={-180}
+                max={180}
+                step={1}
+                className='w-full'
+              />
+              <div className='flex justify-between mt-4'>
+                <span className='text-xs text-muted-foreground'>Left</span>
+                <span className='text-xs text-muted-foreground'>Right</span>
+              </div>
+            </div>
           </div>
           <div className='space-y-3'>
             <div className='flex items-center justify-between'>
@@ -149,17 +161,22 @@ export default function ShapeSidebar({
                 {roll}°
               </span>
             </div>
-            <WideTargetSlider
-              value={[roll]}
-              onValueChange={value => onRollChange(value[0])}
-              defaultValue={[0]}
-              min={-180}
-              max={180}
-              step={1}
-              className='w-full'
-            />
+            <div className='relative pt-1'>
+              <WideTargetSlider
+                value={[roll]}
+                onValueChange={value => onRollChange(value[0])}
+                defaultValue={[0]}
+                min={-180}
+                max={180}
+                step={1}
+                className='w-full'
+              />
+              <div className='flex justify-between mt-4'>
+                <span className='text-xs text-muted-foreground'>Left</span>
+                <span className='text-xs text-muted-foreground'>Right</span>
+              </div>
+            </div>
           </div>
-          <hr className='my-6 border-border' />
           <div className='space-y-3'>
             <div className='flex items-center justify-between'>
               <label className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 truncate'>
@@ -185,7 +202,6 @@ export default function ShapeSidebar({
               </div>
             </div>
           </div>
-          <hr className='my-6 border-border' />
           <div className='space-y-3'>
             <div className='flex items-center justify-between'>
               <label className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 truncate'>
@@ -215,11 +231,8 @@ export default function ShapeSidebar({
       ) : (
         <div className='mt-6 space-y-6'>
           <AnimationPresets />
-          <hr className='my-6 border-border' />
           <AnimationEasingSettings />
-          <hr className='my-6 border-border' />
           <AnimationRotationSettings />
-          <hr className='my-6 border-border' />
           <AnimationPauseSettings />
         </div>
       )}

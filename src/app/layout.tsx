@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Script from 'next/script'
 import { ThemeProvider } from '@/lib/theme-provider'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
+import { KeyboardShortcutsButton } from '@/components/keyboard-shortcuts-button'
 import './globals.css'
 import './debug.css'
 import './x3dom.css'
@@ -36,8 +37,9 @@ export default function RootLayout({
         <ThemeProvider>
           <div className='flex h-screen'>
             <div className='ml-[25%] w-3/4 h-screen'>{children}</div>
-            <div className='fixed top-4 right-4 z-50'>
+            <div className='fixed top-4 right-4 z-50 flex flex-col gap-2'>
               <ThemeToggle />
+              <KeyboardShortcutsButton />
             </div>
           </div>
         </ThemeProvider>

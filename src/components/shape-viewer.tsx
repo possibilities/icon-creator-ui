@@ -2,7 +2,9 @@
 
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { useTheme } from 'next-themes'
+import { useSearchParams } from 'next/navigation'
 import { GAP, FOV, SPEED, PITCH, YAW, ROLL } from '@/lib/viewer-defaults'
+import { URL_PARAMS } from '@/lib/viewer-params'
 import { gapToScaleFactor } from '@/lib/polyhedra-client'
 import ClipperLib from 'clipper-lib'
 import { cssVarToX3dColor } from '@/lib/color'
@@ -36,6 +38,7 @@ export default function ShapeViewer({
   const containerRef = useRef<HTMLDivElement>(null)
   const parentRef = useRef<HTMLDivElement>(null)
   const { theme } = useTheme()
+  const searchParams = useSearchParams()
   interface X3DElement extends HTMLElement {
     runtime?: { resize?: () => void }
   }
@@ -48,8 +51,108 @@ export default function ShapeViewer({
   const viewMatrixRef = useRef<string | null>(null)
   const fieldOfView = (fov * Math.PI) / 180
   const [animatedYaw, setAnimatedYaw] = useState(yaw)
+  const [animatedPitch, setAnimatedPitch] = useState(pitch)
+  const [animatedRoll, setAnimatedRoll] = useState(roll)
   const motionAnimationRef = useRef<number | undefined>(undefined)
   const lastTimeRef = useRef<number>(0)
+  const rotationProgressRef = useRef<number>(0)
+  const pauseStartTimeRef = useRef<number>(0)
+  const cycleCountRef = useRef<number>(0)
+  const totalRotationRef = useRef<{ pitch: number; yaw: number; roll: number }>(
+    { pitch: 0, yaw: 0, roll: 0 },
+  )
+  const animationStartTimeRef = useRef<number>(0)
+  const totalPausedTimeRef = useRef<number>(0)
+
+  const getAnimationParams = useCallback(() => {
+    return {
+      easingType: searchParams.get(URL_PARAMS.EASING_TYPE) || 'linear',
+      easingStrength: parseFloat(
+        searchParams.get(URL_PARAMS.EASING_STRENGTH) || '1',
+      ),
+      overshoot: parseFloat(searchParams.get(URL_PARAMS.OVERSHOOT) || '20'),
+      bounces: parseInt(searchParams.get(URL_PARAMS.BOUNCES) || '1'),
+      steps: parseInt(searchParams.get(URL_PARAMS.STEPS) || '8'),
+      stepDuration: parseFloat(
+        searchParams.get(URL_PARAMS.STEP_DURATION) || '0.2',
+      ),
+      axisType: searchParams.get(URL_PARAMS.AXIS_TYPE) || 'y',
+      axisX: parseFloat(searchParams.get(URL_PARAMS.AXIS_X) || '0'),
+      axisY: parseFloat(searchParams.get(URL_PARAMS.AXIS_Y) || '1'),
+      axisZ: parseFloat(searchParams.get(URL_PARAMS.AXIS_Z) || '0'),
+      direction: searchParams.get(URL_PARAMS.DIRECTION) || 'forward',
+      pauseDuration: parseFloat(
+        searchParams.get(URL_PARAMS.PAUSE_DURATION) || '0',
+      ),
+      repeatCount: parseInt(searchParams.get(URL_PARAMS.REPEAT_COUNT) || '1'),
+    }
+  }, [searchParams])
+
+  const easingFunctions = useMemo(
+    () => ({
+      linear: (t: number) => t,
+      'ease-in': (t: number, strength = 1) => Math.pow(t, 1 + strength),
+      'ease-out': (t: number, strength = 1) =>
+        1 - Math.pow(1 - t, 1 + strength),
+      'ease-in-out': (t: number, strength = 1) => {
+        if (t < 0.5) {
+          return Math.pow(2 * t, 1 + strength) / 2
+        } else {
+          return 1 - Math.pow(2 * (1 - t), 1 + strength) / 2
+        }
+      },
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      elastic: (t: number, _overshoot = 20, bounces = 1) => {
+        if (t === 0 || t === 1) return t
+        const p = 0.3 * bounces
+        const s = p / 4
+        const postFix =
+          Math.pow(2, -10 * t) * Math.sin(((t - s) * (2 * Math.PI)) / p)
+        return postFix + 1
+      },
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      bounce: (t: number, _bounces = 1) => {
+        const n1 = 7.5625
+        const d1 = 2.75
+
+        if (t < 1 / d1) {
+          return n1 * t * t
+        } else if (t < 2 / d1) {
+          return n1 * (t -= 1.5 / d1) * t + 0.75
+        } else if (t < 2.5 / d1) {
+          return n1 * (t -= 2.25 / d1) * t + 0.9375
+        } else {
+          return n1 * (t -= 2.625 / d1) * t + 0.984375
+        }
+      },
+      back: (t: number, overshoot = 20) => {
+        const s = overshoot / 100
+        return t * t * ((s + 1) * t - s)
+      },
+      stepped: (t: number, steps = 8, stepDuration = 0.2) => {
+        const stepProgress = t * steps
+        const currentStep = Math.floor(stepProgress)
+        const stepFraction = stepProgress - currentStep
+
+        if (stepFraction < stepDuration) {
+          return currentStep / steps
+        } else {
+          return (currentStep + 1) / steps
+        }
+      },
+      spring: (t: number, overshoot = 20) => {
+        const damping = 0.3
+        const initialAmplitude = overshoot / 100
+        return (
+          1 +
+          Math.exp(-damping * t * 10) *
+            initialAmplitude *
+            Math.sin(t * 10 * Math.PI)
+        )
+      },
+    }),
+    [],
+  )
 
   const calculateBoundingSphere = () => {
     const centroid = vertices.reduce(
@@ -328,9 +431,9 @@ export default function ShapeViewer({
           <scene>
             <navigationinfo type='none' transitionType='"TELEPORT"' transitionTime='0'></navigationinfo>
             <viewpoint id='camera' orientation='0 1 0 0'></viewpoint>
-            <transform rotation='1 0 0 ${(pitch * Math.PI) / 180}'>
+            <transform rotation='1 0 0 ${(animatedPitch * Math.PI) / 180}'>
               <transform rotation='0 1 0 ${(animatedYaw * Math.PI) / 180}'>
-                <transform rotation='0 0 1 ${(roll * Math.PI) / 180}'>
+                <transform rotation='0 0 1 ${(animatedRoll * Math.PI) / 180}'>
                   <group id='geometry-group'>
                     ${geometryContent}
                   </group>
@@ -380,7 +483,7 @@ export default function ShapeViewer({
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shapeName, pitch, yaw, roll])
+  }, [shapeName, pitch, yaw, roll, animatedGap])
 
   useEffect(() => {
     if (!containerRef.current) return
@@ -402,13 +505,213 @@ export default function ShapeViewer({
     }
 
     if (mode === 'motion' && speed > 0) {
-      lastTimeRef.current = performance.now()
+      const animParams = getAnimationParams()
+      const startTime = performance.now()
+      lastTimeRef.current = startTime
+      animationStartTimeRef.current = startTime
+      rotationProgressRef.current = 0
+      pauseStartTimeRef.current = 0
+      cycleCountRef.current = 0
+      totalRotationRef.current = { pitch: 0, yaw: 0, roll: 0 }
+      totalPausedTimeRef.current = 0
 
       const animate = (currentTime: number) => {
         const deltaTime = (currentTime - lastTimeRef.current) / 1000
         lastTimeRef.current = currentTime
 
-        setAnimatedYaw(prevYaw => wrapAngle(prevYaw + speed * deltaTime))
+        if (animParams.pauseDuration > 0 && pauseStartTimeRef.current > 0) {
+          const pauseElapsed = (currentTime - pauseStartTimeRef.current) / 1000
+          if (pauseElapsed < animParams.pauseDuration) {
+            motionAnimationRef.current = requestAnimationFrame(animate)
+            return
+          } else {
+            totalPausedTimeRef.current += pauseElapsed * 1000
+            pauseStartTimeRef.current = 0
+          }
+        }
+
+        const rotationSpeed =
+          speed * (animParams.direction === 'reverse' ? -1 : 1)
+        const degreesPerSecond = rotationSpeed * 6
+
+        if (animParams.easingType === 'linear') {
+          const rotationDelta = degreesPerSecond * deltaTime
+
+          if (animParams.axisType === 'x') {
+            totalRotationRef.current.pitch += rotationDelta
+            setAnimatedPitch(wrapAngle(pitch + totalRotationRef.current.pitch))
+            setAnimatedYaw(yaw)
+            setAnimatedRoll(roll)
+          } else if (animParams.axisType === 'y') {
+            totalRotationRef.current.yaw += rotationDelta
+            setAnimatedPitch(pitch)
+            setAnimatedYaw(wrapAngle(yaw + totalRotationRef.current.yaw))
+            setAnimatedRoll(roll)
+          } else if (animParams.axisType === 'z') {
+            totalRotationRef.current.roll += rotationDelta
+            setAnimatedPitch(pitch)
+            setAnimatedYaw(yaw)
+            setAnimatedRoll(wrapAngle(roll + totalRotationRef.current.roll))
+          } else if (animParams.axisType === 'custom') {
+            const magnitude = Math.sqrt(
+              animParams.axisX * animParams.axisX +
+                animParams.axisY * animParams.axisY +
+                animParams.axisZ * animParams.axisZ,
+            )
+            if (magnitude > 0) {
+              const normalizedX = animParams.axisX / magnitude
+              const normalizedY = animParams.axisY / magnitude
+              const normalizedZ = animParams.axisZ / magnitude
+
+              totalRotationRef.current.pitch += rotationDelta * normalizedX
+              totalRotationRef.current.yaw += rotationDelta * normalizedY
+              totalRotationRef.current.roll += rotationDelta * normalizedZ
+
+              setAnimatedPitch(
+                wrapAngle(pitch + totalRotationRef.current.pitch),
+              )
+              setAnimatedYaw(wrapAngle(yaw + totalRotationRef.current.yaw))
+              setAnimatedRoll(wrapAngle(roll + totalRotationRef.current.roll))
+            }
+          }
+
+          if (animParams.pauseDuration > 0 && pauseStartTimeRef.current === 0) {
+            const totalRotation = Math.abs(
+              animParams.axisType === 'x'
+                ? totalRotationRef.current.pitch
+                : animParams.axisType === 'y'
+                  ? totalRotationRef.current.yaw
+                  : animParams.axisType === 'z'
+                    ? totalRotationRef.current.roll
+                    : Math.sqrt(
+                        totalRotationRef.current.pitch ** 2 +
+                          totalRotationRef.current.yaw ** 2 +
+                          totalRotationRef.current.roll ** 2,
+                      ),
+            )
+            const completedCycles = Math.floor(totalRotation / 360)
+            if (completedCycles > cycleCountRef.current) {
+              cycleCountRef.current = completedCycles
+              if (cycleCountRef.current % animParams.repeatCount === 0) {
+                pauseStartTimeRef.current = currentTime
+              }
+            }
+          }
+        } else {
+          const elapsedTime =
+            (currentTime -
+              animationStartTimeRef.current -
+              totalPausedTimeRef.current) /
+            1000
+
+          const targetRotations = (speed / 60) * elapsedTime
+
+          const currentRotationProgress = targetRotations % 1
+
+          const easingFunc =
+            easingFunctions[
+              animParams.easingType as keyof typeof easingFunctions
+            ] || easingFunctions.linear
+          let easedProgress = currentRotationProgress
+
+          switch (animParams.easingType) {
+            case 'ease-in':
+            case 'ease-out':
+            case 'ease-in-out':
+              easedProgress = easingFunc(
+                currentRotationProgress,
+                animParams.easingStrength,
+              )
+              break
+            case 'elastic':
+              easedProgress = easingFunc(
+                currentRotationProgress,
+                animParams.overshoot,
+                animParams.bounces,
+              )
+              break
+            case 'bounce':
+              easedProgress = easingFunc(
+                currentRotationProgress,
+                animParams.bounces,
+              )
+              break
+            case 'back':
+            case 'spring':
+              easedProgress = easingFunc(
+                currentRotationProgress,
+                animParams.overshoot,
+              )
+              break
+            case 'stepped':
+              easedProgress = easingFunc(
+                currentRotationProgress,
+                animParams.steps,
+                animParams.stepDuration,
+              )
+              break
+            default:
+              easedProgress = easingFunc(currentRotationProgress)
+          }
+
+          const completedRotations = Math.floor(targetRotations)
+          const directionMultiplier =
+            animParams.direction === 'reverse' ? -1 : 1
+          const rotationAngle =
+            (completedRotations * 360 + easedProgress * 360) *
+            directionMultiplier
+
+          if (animParams.axisType === 'x') {
+            totalRotationRef.current.pitch = rotationAngle
+            setAnimatedPitch(wrapAngle(pitch + totalRotationRef.current.pitch))
+            setAnimatedYaw(yaw)
+            setAnimatedRoll(roll)
+          } else if (animParams.axisType === 'y') {
+            totalRotationRef.current.yaw = rotationAngle
+            setAnimatedPitch(pitch)
+            setAnimatedYaw(wrapAngle(yaw + totalRotationRef.current.yaw))
+            setAnimatedRoll(roll)
+          } else if (animParams.axisType === 'z') {
+            totalRotationRef.current.roll = rotationAngle
+            setAnimatedPitch(pitch)
+            setAnimatedYaw(yaw)
+            setAnimatedRoll(wrapAngle(roll + totalRotationRef.current.roll))
+          } else if (animParams.axisType === 'custom') {
+            const magnitude = Math.sqrt(
+              animParams.axisX * animParams.axisX +
+                animParams.axisY * animParams.axisY +
+                animParams.axisZ * animParams.axisZ,
+            )
+            if (magnitude > 0) {
+              const normalizedX = animParams.axisX / magnitude
+              const normalizedY = animParams.axisY / magnitude
+              const normalizedZ = animParams.axisZ / magnitude
+
+              totalRotationRef.current.pitch = rotationAngle * normalizedX
+              totalRotationRef.current.yaw = rotationAngle * normalizedY
+              totalRotationRef.current.roll = rotationAngle * normalizedZ
+
+              setAnimatedPitch(
+                wrapAngle(pitch + totalRotationRef.current.pitch),
+              )
+              setAnimatedYaw(wrapAngle(yaw + totalRotationRef.current.yaw))
+              setAnimatedRoll(wrapAngle(roll + totalRotationRef.current.roll))
+            }
+          }
+
+          if (animParams.pauseDuration > 0 && pauseStartTimeRef.current === 0) {
+            const currentCycleCount = Math.floor(targetRotations)
+            if (
+              currentCycleCount > 0 &&
+              currentCycleCount !== cycleCountRef.current
+            ) {
+              cycleCountRef.current = currentCycleCount
+              if (currentCycleCount % animParams.repeatCount === 0) {
+                pauseStartTimeRef.current = currentTime
+              }
+            }
+          }
+        }
 
         motionAnimationRef.current = requestAnimationFrame(animate)
       }
@@ -416,6 +719,9 @@ export default function ShapeViewer({
       motionAnimationRef.current = requestAnimationFrame(animate)
     } else {
       setAnimatedYaw(yaw)
+      setAnimatedPitch(pitch)
+      setAnimatedRoll(roll)
+      totalRotationRef.current = { pitch: 0, yaw: 0, roll: 0 }
     }
 
     return () => {
@@ -423,21 +729,27 @@ export default function ShapeViewer({
         cancelAnimationFrame(motionAnimationRef.current)
       }
     }
-  }, [mode, speed, yaw])
+  }, [mode, speed, yaw, pitch, roll, getAnimationParams, easingFunctions])
 
   useEffect(() => {
     if (!containerRef.current) return
 
     const transforms = containerRef.current.querySelectorAll('transform')
     if (transforms.length >= 3) {
-      transforms[0].setAttribute('rotation', `1 0 0 ${(pitch * Math.PI) / 180}`)
+      transforms[0].setAttribute(
+        'rotation',
+        `1 0 0 ${(animatedPitch * Math.PI) / 180}`,
+      )
       transforms[1].setAttribute(
         'rotation',
         `0 1 0 ${(animatedYaw * Math.PI) / 180}`,
       )
-      transforms[2].setAttribute('rotation', `0 0 1 ${(roll * Math.PI) / 180}`)
+      transforms[2].setAttribute(
+        'rotation',
+        `0 0 1 ${(animatedRoll * Math.PI) / 180}`,
+      )
     }
-  }, [pitch, animatedYaw, roll])
+  }, [animatedPitch, animatedYaw, animatedRoll])
 
   useEffect(() => {
     const x3dEl = containerRef.current?.querySelector(

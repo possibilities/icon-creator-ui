@@ -39,9 +39,7 @@ export default function ShapeContainer({
   const [yaw, setYaw] = useState(() => getInitialValue(URL_PARAMS.YAW, YAW))
   const [roll, setRoll] = useState(() => getInitialValue(URL_PARAMS.ROLL, ROLL))
   const [fov, setFov] = useState(() => getInitialValue(URL_PARAMS.FOV, FOV))
-  const [speed, setSpeed] = useState(() =>
-    getInitialValue(URL_PARAMS.SPEED, SPEED),
-  )
+  const [speed] = useState(() => getInitialValue(URL_PARAMS.SPEED, SPEED))
 
   const updateURL = useCallback(
     (updates: Record<string, number>) => {
@@ -196,8 +194,6 @@ export default function ShapeContainer({
         onRollChange={setRoll}
         fov={fov}
         onFovChange={setFov}
-        speed={speed}
-        onSpeedChange={setSpeed}
       />
       <div className='w-full h-screen'>
         <ShapeViewer

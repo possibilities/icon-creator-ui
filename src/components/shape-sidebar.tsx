@@ -11,6 +11,10 @@ import {
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { WideTargetSlider } from '@/components/wide-target-slider'
 import { GAP } from '@/lib/viewer-defaults'
+import { AnimationPresets } from '@/components/animation-presets'
+import { AnimationEasingSettings } from '@/components/animation-easing-settings'
+import { AnimationRotationSettings } from '@/components/animation-rotation-settings'
+import { AnimationPauseSettings } from '@/components/animation-pause-settings'
 
 interface ShapeSidebarProps {
   shapes: string[]
@@ -25,8 +29,6 @@ interface ShapeSidebarProps {
   onRollChange: (roll: number) => void
   fov: number
   onFovChange: (fov: number) => void
-  speed: number
-  onSpeedChange: (speed: number) => void
 }
 
 export default function ShapeSidebar({
@@ -42,8 +44,6 @@ export default function ShapeSidebar({
   onRollChange,
   fov,
   onFovChange,
-  speed,
-  onSpeedChange,
 }: ShapeSidebarProps) {
   const router = useRouter()
   const params = useParams()
@@ -214,31 +214,13 @@ export default function ShapeSidebar({
         </div>
       ) : (
         <div className='mt-6 space-y-6'>
-          <div className='space-y-3'>
-            <div className='flex items-center justify-between'>
-              <label className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 truncate'>
-                Rotation Speed
-              </label>
-              <span className='text-sm font-mono text-muted-foreground bg-muted px-2 py-0.5 rounded flex-shrink-0'>
-                {speed}°/s
-              </span>
-            </div>
-            <div className='relative pt-1'>
-              <WideTargetSlider
-                value={[speed]}
-                onValueChange={value => onSpeedChange(value[0])}
-                defaultValue={[30]}
-                min={0}
-                max={120}
-                step={1}
-                className='w-full'
-              />
-              <div className='flex justify-between mt-4'>
-                <span className='text-xs text-muted-foreground'>Stop</span>
-                <span className='text-xs text-muted-foreground'>Fast</span>
-              </div>
-            </div>
-          </div>
+          <AnimationPresets />
+          <hr className='my-6 border-border' />
+          <AnimationEasingSettings />
+          <hr className='my-6 border-border' />
+          <AnimationRotationSettings />
+          <hr className='my-6 border-border' />
+          <AnimationPauseSettings />
         </div>
       )}
     </aside>

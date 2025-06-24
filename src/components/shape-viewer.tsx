@@ -337,6 +337,18 @@ export default function ShapeViewer({
         window.x3dom.reload()
       }
 
+      const styleId = 'x3dom-cursor-override'
+      if (!document.getElementById(styleId)) {
+        const style = document.createElement('style')
+        style.id = styleId
+        style.textContent = `
+          x3d, .x3dom-canvas, .x3dom-canvas-mousedown {
+            cursor: default !important;
+          }
+        `
+        document.head.appendChild(style)
+      }
+
       const x3dElement = containerRef.current.querySelector(
         'x3d',
       ) as HTMLElement

@@ -6,6 +6,7 @@ import { GAP, FOV, SPEED, PITCH, YAW, ROLL } from '@/lib/viewer-defaults'
 import { gapToScaleFactor } from '@/lib/polyhedra-client'
 import ClipperLib from 'clipper-lib'
 import { cssVarToX3dColor } from '@/lib/color'
+import { wrapAngle } from '@/lib/rotation-utils'
 
 interface ShapeViewerProps {
   shapeName: string
@@ -407,12 +408,7 @@ export default function ShapeViewer({
         const deltaTime = (currentTime - lastTimeRef.current) / 1000
         lastTimeRef.current = currentTime
 
-        setAnimatedYaw(prevYaw => {
-          let newYaw = prevYaw + speed * deltaTime
-          while (newYaw > 180) newYaw -= 360
-          while (newYaw < -180) newYaw += 360
-          return newYaw
-        })
+        setAnimatedYaw(prevYaw => wrapAngle(prevYaw + speed * deltaTime))
 
         motionAnimationRef.current = requestAnimationFrame(animate)
       }

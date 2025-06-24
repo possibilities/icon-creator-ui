@@ -7,6 +7,7 @@ import ShapeViewer from './shape-viewer'
 import { GAP, FOV, SPEED, PITCH, YAW, ROLL } from '@/lib/viewer-defaults'
 import { URL_PARAMS } from '@/lib/viewer-params'
 import { debounce } from '@/lib/url-helpers'
+import { wrapAngle } from '@/lib/rotation-utils'
 
 interface ShapeContainerProps {
   shapes: string[]
@@ -107,30 +108,22 @@ export default function ShapeContainer({
       const step = SPEED_DEGREES_PER_SECOND * deltaTime
 
       if (keysPressed.has('K')) {
-        setPitch(prev => Math.round(Math.max(-180, Math.min(180, prev - step))))
+        setPitch(prev => Math.round(wrapAngle(prev - step)))
       }
       if (keysPressed.has('J')) {
-        setPitch(prev => Math.round(Math.max(-180, Math.min(180, prev + step))))
+        setPitch(prev => Math.round(wrapAngle(prev + step)))
       }
       if (keysPressed.has('H')) {
-        setYaw(prev => {
-          let newYaw = prev - step
-          if (newYaw < -180) newYaw += 360
-          return Math.round(newYaw)
-        })
+        setYaw(prev => Math.round(wrapAngle(prev - step)))
       }
       if (keysPressed.has('L')) {
-        setYaw(prev => {
-          let newYaw = prev + step
-          if (newYaw > 180) newYaw -= 360
-          return Math.round(newYaw)
-        })
+        setYaw(prev => Math.round(wrapAngle(prev + step)))
       }
       if (keysPressed.has('P')) {
-        setRoll(prev => Math.round(Math.max(-180, Math.min(180, prev - step))))
+        setRoll(prev => Math.round(wrapAngle(prev - step)))
       }
       if (keysPressed.has('N')) {
-        setRoll(prev => Math.round(Math.max(-180, Math.min(180, prev + step))))
+        setRoll(prev => Math.round(wrapAngle(prev + step)))
       }
 
       if (keysPressed.size > 0) {
@@ -142,7 +135,20 @@ export default function ShapeContainer({
       if (!e.shiftKey || e.repeat) return
 
       const key = e.key.toUpperCase()
-      if (['K', 'J', 'H', 'L', 'P', 'N'].includes(key)) {
+
+      if (key === 'Q') {
+        e.preventDefault()
+        setFov(prev => Math.max(1, prev - 1))
+      } else if (key === 'W') {
+        e.preventDefault()
+        setFov(prev => Math.min(40, prev + 1))
+      } else if (key === 'A') {
+        e.preventDefault()
+        setGap(prev => Math.max(1, prev - 1))
+      } else if (key === 'S') {
+        e.preventDefault()
+        setGap(prev => Math.min(20, prev + 1))
+      } else if (['K', 'J', 'H', 'L', 'P', 'N'].includes(key)) {
         e.preventDefault()
         keysPressed.add(key)
 

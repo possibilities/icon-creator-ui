@@ -10,6 +10,7 @@ import { debounce } from '@/lib/url-helpers'
 interface ShapeContainerProps {
   shapes: string[]
   shapeName: string
+  mode: string
   vertices: number[][]
   faces: number[][]
 }
@@ -17,6 +18,7 @@ interface ShapeContainerProps {
 export default function ShapeContainer({
   shapes,
   shapeName,
+  mode,
   vertices,
   faces,
 }: ShapeContainerProps) {
@@ -54,9 +56,9 @@ export default function ShapeContainer({
         }
       })
 
-      router.push(`/${shapeName}?${params.toString()}`)
+      router.push(`/${shapeName}/${mode}?${params.toString()}`)
     },
-    [router, searchParams, shapeName],
+    [router, searchParams, shapeName, mode],
   )
 
   const debouncedUpdateURL = useMemo(
@@ -81,6 +83,7 @@ export default function ShapeContainer({
     <>
       <ShapeSidebar
         shapes={shapes}
+        mode={mode}
         gap={gap}
         onGapChange={setGap}
         pitch={pitch}

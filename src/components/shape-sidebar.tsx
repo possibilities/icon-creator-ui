@@ -1,6 +1,6 @@
 'use client'
 
-import { useRouter, useParams } from 'next/navigation'
+import { useRouter, useParams, useSearchParams } from 'next/navigation'
 import {
   Select,
   SelectContent,
@@ -8,11 +8,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { WideTargetSlider } from '@/components/wide-target-slider'
 import { GAP_SIZE } from '@/lib/defaults'
 
 interface ShapeSidebarProps {
   shapes: string[]
+  mode: string
   gap: number
   onGapChange: (gap: number) => void
   pitch: number
@@ -27,6 +29,7 @@ interface ShapeSidebarProps {
 
 export default function ShapeSidebar({
   shapes,
+  mode,
   gap,
   onGapChange,
   pitch,
@@ -40,10 +43,19 @@ export default function ShapeSidebar({
 }: ShapeSidebarProps) {
   const router = useRouter()
   const params = useParams()
+  const searchParams = useSearchParams()
   const currentShape = params.shape as string
 
   const handleShapeChange = (value: string) => {
-    router.push(`/${value}`)
+    const queryString = searchParams.toString()
+    router.push(`/${value}/${mode}${queryString ? `?${queryString}` : ''}`)
+  }
+
+  const handleModeChange = (value: string) => {
+    const queryString = searchParams.toString()
+    router.push(
+      `/${currentShape}/${value}${queryString ? `?${queryString}` : ''}`,
+    )
   }
 
   const handleGapChange = (value: number[]) => {
@@ -70,117 +82,139 @@ export default function ShapeSidebar({
           ))}
         </SelectContent>
       </Select>
-      <div className='mt-6 space-y-6'>
-        <div className='space-y-3'>
-          <div className='flex items-center justify-between'>
-            <label className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 truncate'>
-              Look Up/Down
-            </label>
-            <span className='text-sm font-mono text-muted-foreground bg-muted px-2 py-0.5 rounded flex-shrink-0'>
-              {pitch}°
-            </span>
-          </div>
-          <WideTargetSlider
-            value={[pitch]}
-            onValueChange={value => onPitchChange(value[0])}
-            defaultValue={[0]}
-            min={-180}
-            max={180}
-            step={1}
-            className='w-full'
-          />
-        </div>
-        <div className='space-y-3'>
-          <div className='flex items-center justify-between'>
-            <label className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 truncate'>
-              Turn Left/Right
-            </label>
-            <span className='text-sm font-mono text-muted-foreground bg-muted px-2 py-0.5 rounded flex-shrink-0'>
-              {yaw}°
-            </span>
-          </div>
-          <WideTargetSlider
-            value={[yaw]}
-            onValueChange={value => onYawChange(value[0])}
-            defaultValue={[0]}
-            min={-180}
-            max={180}
-            step={1}
-            className='w-full'
-          />
-        </div>
-        <div className='space-y-3'>
-          <div className='flex items-center justify-between'>
-            <label className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 truncate'>
-              Tilt Sideways
-            </label>
-            <span className='text-sm font-mono text-muted-foreground bg-muted px-2 py-0.5 rounded flex-shrink-0'>
-              {roll}°
-            </span>
-          </div>
-          <WideTargetSlider
-            value={[roll]}
-            onValueChange={value => onRollChange(value[0])}
-            defaultValue={[0]}
-            min={-180}
-            max={180}
-            step={1}
-            className='w-full'
-          />
-        </div>
-        <hr className='my-6 border-border' />
-        <div className='space-y-3'>
-          <div className='flex items-center justify-between'>
-            <label className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 truncate'>
-              Field of View
-            </label>
-            <span className='text-sm font-mono text-muted-foreground bg-muted px-2 py-0.5 rounded flex-shrink-0'>
-              {fov}°
-            </span>
-          </div>
-          <div className='relative pt-1'>
+      <Tabs
+        value={mode}
+        onValueChange={handleModeChange}
+        className='w-full mt-4'
+      >
+        <TabsList className='w-full'>
+          <TabsTrigger value='scene' className='flex-1'>
+            Scene
+          </TabsTrigger>
+          <TabsTrigger value='motion' className='flex-1'>
+            Motion
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
+      {mode === 'scene' ? (
+        <div className='mt-6 space-y-6'>
+          <div className='space-y-3'>
+            <div className='flex items-center justify-between'>
+              <label className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 truncate'>
+                Look Up/Down
+              </label>
+              <span className='text-sm font-mono text-muted-foreground bg-muted px-2 py-0.5 rounded flex-shrink-0'>
+                {pitch}°
+              </span>
+            </div>
             <WideTargetSlider
-              value={[fov]}
-              onValueChange={value => onFovChange(value[0])}
-              defaultValue={[23]}
-              min={1}
-              max={40}
+              value={[pitch]}
+              onValueChange={value => onPitchChange(value[0])}
+              defaultValue={[0]}
+              min={-180}
+              max={180}
               step={1}
               className='w-full'
             />
-            <div className='flex justify-between mt-4'>
-              <span className='text-xs text-muted-foreground'>Narrow</span>
-              <span className='text-xs text-muted-foreground'>Wide</span>
+          </div>
+          <div className='space-y-3'>
+            <div className='flex items-center justify-between'>
+              <label className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 truncate'>
+                Turn Left/Right
+              </label>
+              <span className='text-sm font-mono text-muted-foreground bg-muted px-2 py-0.5 rounded flex-shrink-0'>
+                {yaw}°
+              </span>
             </div>
-          </div>
-        </div>
-        <hr className='my-6 border-border' />
-        <div className='space-y-3'>
-          <div className='flex items-center justify-between'>
-            <label className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 truncate'>
-              Face Separation
-            </label>
-            <span className='text-sm font-mono text-muted-foreground bg-muted px-2 py-0.5 rounded flex-shrink-0'>
-              {gap}
-            </span>
-          </div>
-          <div className='relative pt-1'>
             <WideTargetSlider
-              value={[gap]}
-              onValueChange={handleGapChange}
-              defaultValue={[GAP_SIZE]}
-              min={1}
-              max={20}
+              value={[yaw]}
+              onValueChange={value => onYawChange(value[0])}
+              defaultValue={[0]}
+              min={-180}
+              max={180}
               step={1}
               className='w-full'
             />
-            <div className='flex justify-between mt-4'>
-              <span className='text-xs text-muted-foreground'>Compact</span>
-              <span className='text-xs text-muted-foreground'>Exploded</span>
+          </div>
+          <div className='space-y-3'>
+            <div className='flex items-center justify-between'>
+              <label className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 truncate'>
+                Tilt Sideways
+              </label>
+              <span className='text-sm font-mono text-muted-foreground bg-muted px-2 py-0.5 rounded flex-shrink-0'>
+                {roll}°
+              </span>
+            </div>
+            <WideTargetSlider
+              value={[roll]}
+              onValueChange={value => onRollChange(value[0])}
+              defaultValue={[0]}
+              min={-180}
+              max={180}
+              step={1}
+              className='w-full'
+            />
+          </div>
+          <hr className='my-6 border-border' />
+          <div className='space-y-3'>
+            <div className='flex items-center justify-between'>
+              <label className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 truncate'>
+                Field of View
+              </label>
+              <span className='text-sm font-mono text-muted-foreground bg-muted px-2 py-0.5 rounded flex-shrink-0'>
+                {fov}°
+              </span>
+            </div>
+            <div className='relative pt-1'>
+              <WideTargetSlider
+                value={[fov]}
+                onValueChange={value => onFovChange(value[0])}
+                defaultValue={[23]}
+                min={1}
+                max={40}
+                step={1}
+                className='w-full'
+              />
+              <div className='flex justify-between mt-4'>
+                <span className='text-xs text-muted-foreground'>Narrow</span>
+                <span className='text-xs text-muted-foreground'>Wide</span>
+              </div>
+            </div>
+          </div>
+          <hr className='my-6 border-border' />
+          <div className='space-y-3'>
+            <div className='flex items-center justify-between'>
+              <label className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 truncate'>
+                Face Separation
+              </label>
+              <span className='text-sm font-mono text-muted-foreground bg-muted px-2 py-0.5 rounded flex-shrink-0'>
+                {gap}
+              </span>
+            </div>
+            <div className='relative pt-1'>
+              <WideTargetSlider
+                value={[gap]}
+                onValueChange={handleGapChange}
+                defaultValue={[GAP_SIZE]}
+                min={1}
+                max={20}
+                step={1}
+                className='w-full'
+              />
+              <div className='flex justify-between mt-4'>
+                <span className='text-xs text-muted-foreground'>Compact</span>
+                <span className='text-xs text-muted-foreground'>Exploded</span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      ) : (
+        <div className='mt-6 space-y-6'>
+          <div className='text-center text-muted-foreground'>
+            <p>Motion controls coming soon</p>
+          </div>
+        </div>
+      )}
     </aside>
   )
 }

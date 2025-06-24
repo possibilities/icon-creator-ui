@@ -1,39 +1,32 @@
-import { Suspense } from 'react'
-import {
-  getAllPolyhedronNames,
-  getPolyhedronData,
-} from '@/lib/polyhedra-server'
-import ShapeContainer from '@/components/shape-container'
-
-export const dynamicParams = false
-
-export async function generateStaticParams() {
-  const shapes = await getAllPolyhedronNames()
-
-  return shapes.map(shape => ({
-    shape: shape,
-  }))
-}
+import { redirect } from 'next/navigation'
 
 interface PageProps {
   params: Promise<{
     shape: string
   }>
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
-export default async function PolyhedronPage({ params }: PageProps) {
+export default async function ShapeRedirect({
+  params,
+  searchParams,
+}: PageProps) {
   const resolvedParams = await params
-  const data = await getPolyhedronData(resolvedParams.shape)
-  const shapes = await getAllPolyhedronNames()
+  const resolvedSearchParams = await searchParams
 
-  return (
-    <Suspense fallback={null}>
-      <ShapeContainer
-        shapes={shapes}
-        shapeName={resolvedParams.shape}
-        vertices={data!.vertices}
-        faces={data!.faces}
-      />
-    </Suspense>
+  const queryString = new URLSearchParams(
+    Object.entries(resolvedSearchParams).reduce(
+      (acc, [key, value]) => {
+        if (value) {
+          acc[key] = Array.isArray(value) ? value[0] : value
+        }
+        return acc
+      },
+      {} as Record<string, string>,
+    ),
+  ).toString()
+
+  redirect(
+    `/${resolvedParams.shape}/scene${queryString ? `?${queryString}` : ''}`,
   )
 }

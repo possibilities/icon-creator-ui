@@ -4,5 +4,5 @@ import { getAllPolyhedronNames } from '@/lib/polyhedra-server'
 export default async function Home() {
   const polyhedra = await getAllPolyhedronNames()
 
-  redirect(`/${polyhedra[0]}`)
+  redirect(`/${polyhedra[0]}/scene`)
 }

@@ -389,7 +389,7 @@ export default function ShapeViewer({
         cancelAnimationFrame(animationRef.current)
       }
     }
-  }, [gapSize])
+  }, [gapSize, animatedGap])
 
   const geometryContent = useMemo(() => {
     return faces

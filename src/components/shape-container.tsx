@@ -89,6 +89,52 @@ export default function ShapeContainer({
     })
   }, [gap, pitch, yaw, roll, fov, speed, debouncedUpdateURL])
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!e.shiftKey) return
+
+      const STEP = 1
+
+      switch (e.key) {
+        case 'K':
+          e.preventDefault()
+          setPitch(prev => Math.max(-180, Math.min(180, prev - STEP)))
+          break
+        case 'J':
+          e.preventDefault()
+          setPitch(prev => Math.max(-180, Math.min(180, prev + STEP)))
+          break
+        case 'H':
+          e.preventDefault()
+          setYaw(prev => {
+            let newYaw = prev - STEP
+            if (newYaw < -180) newYaw += 360
+            return newYaw
+          })
+          break
+        case 'L':
+          e.preventDefault()
+          setYaw(prev => {
+            let newYaw = prev + STEP
+            if (newYaw > 180) newYaw -= 360
+            return newYaw
+          })
+          break
+        case 'P':
+          e.preventDefault()
+          setRoll(prev => Math.max(-180, Math.min(180, prev - STEP)))
+          break
+        case 'N':
+          e.preventDefault()
+          setRoll(prev => Math.max(-180, Math.min(180, prev + STEP)))
+          break
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
+
   return (
     <>
       <ShapeSidebar

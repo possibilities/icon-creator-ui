@@ -154,6 +154,99 @@ export default function ShapeViewer({
     [],
   )
 
+  const projectVertex = useCallback(
+    (v: number[]) => {
+      const radPitch = (pitch * Math.PI) / 180
+      const radYaw = (yaw * Math.PI) / 180
+      const radRoll = (roll * Math.PI) / 180
+
+      const cx = Math.cos(radPitch)
+      const sx = Math.sin(radPitch)
+      const cy = Math.cos(radYaw)
+      const sy = Math.sin(radYaw)
+      const cz = Math.cos(radRoll)
+      const sz = Math.sin(radRoll)
+
+      let x = v[0]
+      let y = v[1]
+      let z = v[2]
+
+      // rotate around X (pitch)
+      const y1 = y * cx - z * sx
+      const z1 = y * sx + z * cx
+      y = y1
+      z = z1
+
+      // rotate around Y (yaw)
+      const x2 = x * cy + z * sy
+      const z2 = -x * sy + z * cy
+      x = x2
+      z = z2
+
+      // rotate around Z (roll)
+      const x3 = x * cz - y * sz
+      const y3 = x * sz + y * cz
+      x = x3
+      y = y3
+
+      const zc = z - cameraDistance
+      const f = 1 / Math.tan(fieldOfView / 2)
+
+      const ndcX = (x * f) / -zc
+      const ndcY = (y * f) / -zc
+
+      return {
+        x: (ndcX + 1) * (dimensions.width / 2),
+        y: (1 - ndcY) * (dimensions.height / 2),
+        pos: [x, y, z] as [number, number, number],
+      }
+    },
+    [pitch, yaw, roll, cameraDistance, fieldOfView, dimensions],
+  )
+
+  const logFrontFaceProjections = useCallback(() => {
+    const facesInfo = faces.map((face, i) => {
+      const verts3d = face.map(idx => projectVertex(vertices[idx]).pos)
+      const verts2d = face.map(idx => {
+        const { x, y } = projectVertex(vertices[idx])
+        return { x, y }
+      })
+
+      const centroid = verts3d.reduce(
+        (acc, v) => [acc[0] + v[0], acc[1] + v[1], acc[2] + v[2]],
+        [0, 0, 0],
+      )
+      centroid[0] /= verts3d.length
+      centroid[1] /= verts3d.length
+      centroid[2] /= verts3d.length
+
+      const a = verts3d[0]
+      const b = verts3d[1]
+      const c = verts3d[2]
+      const ab = [b[0] - a[0], b[1] - a[1], b[2] - a[2]]
+      const ac = [c[0] - a[0], c[1] - a[1], c[2] - a[2]]
+      const normal = [
+        ab[1] * ac[2] - ab[2] * ac[1],
+        ab[2] * ac[0] - ab[0] * ac[2],
+        ab[0] * ac[1] - ab[1] * ac[0],
+      ]
+      const toCamera = [
+        -centroid[0],
+        -centroid[1],
+        cameraDistance - centroid[2],
+      ]
+      const dot =
+        normal[0] * toCamera[0] +
+        normal[1] * toCamera[1] +
+        normal[2] * toCamera[2]
+
+      return { faceIndex: i, vertices: verts2d, front: dot > 0 }
+    })
+
+    const frontFaces = facesInfo.filter(f => f.front)
+    console.log('Front face projections', frontFaces)
+  }, [faces, vertices, projectVertex, cameraDistance])
+
   const calculateBoundingSphere = () => {
     const centroid = vertices.reduce(
       (acc, vertex) => [
@@ -768,6 +861,26 @@ export default function ShapeViewer({
       x3dEl.runtime.resize()
     }
   }, [dimensions, cameraDistance, fieldOfView, fov])
+
+  useEffect(() => {
+    if (!containerRef.current) return
+
+    let logged = false
+    const observer = new IntersectionObserver(entries => {
+      const entry = entries[0]
+      if (entry.isIntersecting && !logged) {
+        logged = true
+        logFrontFaceProjections()
+        observer.disconnect()
+      }
+    })
+
+    observer.observe(containerRef.current)
+
+    return () => {
+      observer.disconnect()
+    }
+  }, [logFrontFaceProjections])
 
   return (
     <div

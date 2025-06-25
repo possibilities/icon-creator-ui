@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Image, Video } from 'lucide-react'
+import { Image as ImageIcon, Video } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 type AnimationState = 'hidden' | 'entering' | 'active' | 'exiting'
@@ -67,7 +67,7 @@ export function FabContainer({
         setTimeout(() => setAnimationState('active'), 300)
       }
     }
-  }, [mode])
+  }, [mode, animationState, downloadState])
 
   const fabClasses = cn(
     'group relative inline-flex items-center gap-3 px-5 py-3 rounded-full',
@@ -102,7 +102,7 @@ export function FabContainer({
           aria-label='Save icon'
           disabled={downloadState === 'exiting'}
         >
-          <Image
+          <ImageIcon
             className='h-5 w-5 text-primary transition-transform duration-300 group-hover:-translate-y-0.5 flex-shrink-0'
             aria-hidden='true'
           />

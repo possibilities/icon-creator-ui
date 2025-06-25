@@ -10,6 +10,12 @@ import ClipperLib from 'clipper-lib'
 import { cssVarToX3dColor } from '@/lib/color'
 import { wrapAngle } from '@/lib/rotation-utils'
 
+interface PolygonData {
+  faceIndex: number
+  vertices: { x: number; y: number }[]
+  front: boolean
+}
+
 interface ShapeViewerProps {
   shapeName: string
   vertices: number[][]
@@ -21,6 +27,7 @@ interface ShapeViewerProps {
   fov?: number
   speed?: number
   mode?: string
+  onProjectionsComputed?: (projections: PolygonData[]) => void
 }
 
 export default function ShapeViewer({
@@ -34,6 +41,7 @@ export default function ShapeViewer({
   fov = FOV,
   speed = SPEED,
   mode = 'scene',
+  onProjectionsComputed,
 }: ShapeViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const parentRef = useRef<HTMLDivElement>(null)
@@ -368,7 +376,18 @@ export default function ShapeViewer({
     } catch (e) {
       console.error('Failed to save projections to localStorage:', e)
     }
-  }, [faces, projectVertex, cameraDistance, animatedGap, insetFace])
+
+    if (onProjectionsComputed) {
+      onProjectionsComputed(facesInfo)
+    }
+  }, [
+    faces,
+    projectVertex,
+    cameraDistance,
+    animatedGap,
+    insetFace,
+    onProjectionsComputed,
+  ])
 
   useEffect(() => {
     updateCameraDistance()

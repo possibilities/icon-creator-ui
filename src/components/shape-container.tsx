@@ -4,10 +4,19 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import ShapeSidebar from './shape-sidebar'
 import ShapeViewer from './shape-viewer'
+import { FabContainer } from './fab-container'
+import { SaveIconsModal } from './save-icons-modal'
+import { SaveAnimationModal } from './save-animation-modal'
 import { GAP, FOV, SPEED, PITCH, YAW, ROLL } from '@/lib/viewer-defaults'
 import { URL_PARAMS } from '@/lib/viewer-params'
 import { debounce } from '@/lib/url-helpers'
 import { wrapAngle } from '@/lib/rotation-utils'
+
+interface PolygonData {
+  faceIndex: number
+  vertices: { x: number; y: number }[]
+  front: boolean
+}
 
 interface ShapeContainerProps {
   shapes: string[]
@@ -40,6 +49,10 @@ export default function ShapeContainer({
   const [roll, setRoll] = useState(() => getInitialValue(URL_PARAMS.ROLL, ROLL))
   const [fov, setFov] = useState(() => getInitialValue(URL_PARAMS.FOV, FOV))
   const [speed] = useState(() => getInitialValue(URL_PARAMS.SPEED, SPEED))
+
+  const [isIconsModalOpen, setIsIconsModalOpen] = useState(false)
+  const [isAnimationModalOpen, setIsAnimationModalOpen] = useState(false)
+  const [projections, setProjections] = useState<PolygonData[]>([])
 
   const updateURL = useCallback(
     (updates: Record<string, number>) => {
@@ -181,6 +194,21 @@ export default function ShapeContainer({
     }
   }, [])
 
+  const handleDownloadClick = () => {
+    setIsIconsModalOpen(true)
+  }
+
+  const handleAnimationSaveClick = () => {
+    setIsAnimationModalOpen(true)
+  }
+
+  const handleProjectionsComputed = useCallback(
+    (newProjections: PolygonData[]) => {
+      setProjections(newProjections)
+    },
+    [],
+  )
+
   return (
     <>
       <ShapeSidebar
@@ -210,8 +238,28 @@ export default function ShapeContainer({
           fov={fov}
           speed={speed}
           mode={mode}
+          onProjectionsComputed={handleProjectionsComputed}
         />
       </div>
+
+      <FabContainer
+        mode={mode}
+        onDownloadClick={handleDownloadClick}
+        onAnimationSaveClick={handleAnimationSaveClick}
+      />
+
+      <SaveIconsModal
+        isOpen={isIconsModalOpen}
+        onClose={() => setIsIconsModalOpen(false)}
+        shapeName={shapeName}
+        projections={projections}
+      />
+
+      <SaveAnimationModal
+        isOpen={isAnimationModalOpen}
+        onClose={() => setIsAnimationModalOpen(false)}
+        shapeName={shapeName}
+      />
     </>
   )
 }

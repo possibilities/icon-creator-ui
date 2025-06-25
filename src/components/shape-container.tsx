@@ -89,6 +89,12 @@ export default function ShapeContainer({
   }, [gap, pitch, yaw, roll, fov, speed, debouncedUpdateURL])
 
   useEffect(() => {
+    setPitch(PITCH)
+    setYaw(YAW)
+    setRoll(ROLL)
+  }, [shapeName])
+
+  useEffect(() => {
     const keysPressed = new Set<string>()
     let animationId: number | null = null
     let lastTime = 0

@@ -416,7 +416,11 @@ export default function ShapeViewer({
         ) {
           setTimeout(() => {
             try {
-              if (viewpoint._x3domNode && viewMatrixRef.current) {
+              if (
+                viewpoint._x3domNode &&
+                viewMatrixRef.current &&
+                typeof viewpoint._x3domNode.setViewMatrix === 'function'
+              ) {
                 const values = viewMatrixRef.current
                   .split(/[\s,]+/)
                   .map(v => parseFloat(v))
@@ -445,7 +449,7 @@ export default function ShapeViewer({
                 }
               }
             } catch (error) {
-              console.warn('Failed to restore view matrix:', error)
+              // Silently fail if view matrix restoration is not supported
             }
           }, 0)
         }

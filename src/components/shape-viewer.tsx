@@ -154,6 +154,57 @@ export default function ShapeViewer({
     [],
   )
 
+  const projectVertex = useCallback(
+    (v: number[]) => {
+      const radPitch = (animatedPitch * Math.PI) / 180
+      const radYaw = (animatedYaw * Math.PI) / 180
+      const radRoll = (animatedRoll * Math.PI) / 180
+
+      const cx = Math.cos(radPitch)
+      const sx = Math.sin(radPitch)
+      const cy = Math.cos(radYaw)
+      const sy = Math.sin(radYaw)
+      const cz = Math.cos(radRoll)
+      const sz = Math.sin(radRoll)
+
+      const x = v[0]
+      const y = v[1]
+      const z = v[2]
+
+      const x1 = x * cz - y * sz
+      const y1 = x * sz + y * cz
+      const z1 = z
+
+      const x2 = x1 * cy + z1 * sy
+      const y2 = y1
+      const z2 = -x1 * sy + z1 * cy
+
+      const x3 = x2
+      const y3 = y2 * cx - z2 * sx
+      const z3 = y2 * sx + z2 * cx
+
+      const zc = z3 - cameraDistance
+      const f = 1 / Math.tan(fieldOfView / 2)
+
+      const ndcX = (x3 * f) / -zc
+      const ndcY = (y3 * f) / -zc
+
+      return {
+        x: (ndcX + 1) * (dimensions.width / 2),
+        y: (1 - ndcY) * (dimensions.height / 2),
+        pos: [x3, y3, z3] as [number, number, number],
+      }
+    },
+    [
+      animatedPitch,
+      animatedYaw,
+      animatedRoll,
+      cameraDistance,
+      fieldOfView,
+      dimensions,
+    ],
+  )
+
   const calculateBoundingSphere = () => {
     const centroid = vertices.reduce(
       (acc, vertex) => [
@@ -269,6 +320,58 @@ export default function ShapeViewer({
     },
     [vertices],
   )
+
+  const logFrontFaceProjections = useCallback(() => {
+    const facesInfo = faces.map((face, i) => {
+      const insetVerts = insetFace(face, animatedGap)
+
+      const verts3d = insetVerts.map(v => projectVertex(v).pos)
+      const verts2d = insetVerts.map(v => {
+        const { x, y } = projectVertex(v)
+        return { x, y }
+      })
+
+      const centroid = verts3d.reduce(
+        (acc, v) => [acc[0] + v[0], acc[1] + v[1], acc[2] + v[2]],
+        [0, 0, 0],
+      )
+      centroid[0] /= verts3d.length
+      centroid[1] /= verts3d.length
+      centroid[2] /= verts3d.length
+
+      const a = verts3d[0]
+      const b = verts3d[1]
+      const c = verts3d[2]
+      const ab = [b[0] - a[0], b[1] - a[1], b[2] - a[2]]
+      const ac = [c[0] - a[0], c[1] - a[1], c[2] - a[2]]
+      const normal = [
+        ab[1] * ac[2] - ab[2] * ac[1],
+        ab[2] * ac[0] - ab[0] * ac[2],
+        ab[0] * ac[1] - ab[1] * ac[0],
+      ]
+      const toCamera = [
+        -centroid[0],
+        -centroid[1],
+        cameraDistance - centroid[2],
+      ]
+      const dot =
+        normal[0] * toCamera[0] +
+        normal[1] * toCamera[1] +
+        normal[2] * toCamera[2]
+
+      return { faceIndex: i, vertices: verts2d, front: dot > 0 }
+    })
+
+    const frontFaces = facesInfo.filter(f => f.front)
+    console.log('Front face projections', frontFaces)
+
+    try {
+      localStorage.setItem('shapeViewerProjections', JSON.stringify(facesInfo))
+      window.dispatchEvent(new Event('storage'))
+    } catch (e) {
+      console.error('Failed to save projections to localStorage:', e)
+    }
+  }, [faces, projectVertex, cameraDistance, animatedGap, insetFace])
 
   useEffect(() => {
     updateCameraDistance()
@@ -768,6 +871,38 @@ export default function ShapeViewer({
       x3dEl.runtime.resize()
     }
   }, [dimensions, cameraDistance, fieldOfView, fov])
+
+  useEffect(() => {
+    if (!containerRef.current) return
+
+    const observer = new IntersectionObserver(entries => {
+      const entry = entries[0]
+      if (entry.isIntersecting) {
+        logFrontFaceProjections()
+      }
+    })
+
+    observer.observe(containerRef.current)
+
+    return () => {
+      observer.disconnect()
+    }
+  }, [logFrontFaceProjections])
+
+  useEffect(() => {
+    if (containerRef.current) {
+      logFrontFaceProjections()
+    }
+  }, [
+    animatedPitch,
+    animatedYaw,
+    animatedRoll,
+    animatedGap,
+    cameraDistance,
+    fieldOfView,
+    dimensions,
+    logFrontFaceProjections,
+  ])
 
   return (
     <div

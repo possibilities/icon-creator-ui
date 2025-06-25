@@ -64,7 +64,9 @@ export default function ShapeContainer({
         }
       })
 
-      router.push(`/${shapeName}/${mode}?${params.toString()}`)
+      router.push(`/${shapeName}/${mode}?${params.toString()}`, {
+        scroll: false,
+      })
     },
     [router, searchParams, shapeName, mode],
   )

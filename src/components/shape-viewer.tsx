@@ -449,7 +449,7 @@ export default function ShapeViewer({
                 }
               }
             } catch (error) {
-              // Silently fail if view matrix restoration is not supported
+              console.error('Failed to restore view matrix:', error)
             }
           }, 0)
         }

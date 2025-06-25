@@ -52,13 +52,16 @@ export default function ShapeSidebar({
 
   const handleShapeChange = (value: string) => {
     const queryString = searchParams.toString()
-    router.push(`/${value}/${mode}${queryString ? `?${queryString}` : ''}`)
+    router.push(`/${value}/${mode}${queryString ? `?${queryString}` : ''}`, {
+      scroll: false,
+    })
   }
 
   const handleModeChange = (value: string) => {
     const queryString = searchParams.toString()
     router.push(
       `/${currentShape}/${value}${queryString ? `?${queryString}` : ''}`,
+      { scroll: false },
     )
   }
 

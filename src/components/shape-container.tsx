@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import ShapeSidebar from './shape-sidebar'
-import ShapeViewer from './shape-viewer'
+import ShapeViewer, { type ShapeViewerHandle } from './shape-viewer'
 import { FabContainer } from './fab-container'
 import { SaveIconsModal } from './save-icons-modal'
 import { SaveAnimationModal } from './save-animation-modal'
@@ -53,6 +53,7 @@ export default function ShapeContainer({
   const [isIconsModalOpen, setIsIconsModalOpen] = useState(false)
   const [isAnimationModalOpen, setIsAnimationModalOpen] = useState(false)
   const [projections, setProjections] = useState<PolygonData[]>([])
+  const shapeViewerRef = useRef<ShapeViewerHandle>(null)
 
   const updateURL = useCallback(
     (updates: Record<string, number>) => {
@@ -196,18 +197,19 @@ export default function ShapeContainer({
 
   const handleDownloadClick = () => {
     setIsIconsModalOpen(true)
+    // Calculate projections after modal opens for responsiveness
+    setTimeout(() => {
+      if (shapeViewerRef.current) {
+        const newProjections = shapeViewerRef.current.calculateProjections()
+        setProjections(newProjections)
+      }
+    }, 0)
   }
 
   const handleAnimationSaveClick = () => {
     setIsAnimationModalOpen(true)
   }
 
-  const handleProjectionsComputed = useCallback(
-    (newProjections: PolygonData[]) => {
-      setProjections(newProjections)
-    },
-    [],
-  )
 
   return (
     <>
@@ -227,6 +229,7 @@ export default function ShapeContainer({
       />
       <div className='w-full h-screen'>
         <ShapeViewer
+          ref={shapeViewerRef}
           key={shapeName}
           shapeName={shapeName}
           vertices={vertices}
@@ -238,7 +241,6 @@ export default function ShapeContainer({
           fov={fov}
           speed={speed}
           mode={mode}
-          onProjectionsComputed={handleProjectionsComputed}
         />
       </div>
 

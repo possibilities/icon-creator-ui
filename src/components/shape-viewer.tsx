@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
+import { useEffect, useRef, useState, useCallback, useMemo, useImperativeHandle, forwardRef } from 'react'
 import { useTheme } from 'next-themes'
 import { useSearchParams } from 'next/navigation'
 import { GAP, FOV, SPEED, PITCH, YAW, ROLL } from '@/lib/viewer-defaults'
@@ -30,19 +30,26 @@ interface ShapeViewerProps {
   onProjectionsComputed?: (projections: PolygonData[]) => void
 }
 
-export default function ShapeViewer({
-  shapeName,
-  vertices,
-  faces,
-  gapSize = GAP,
-  pitch = PITCH,
-  yaw = YAW,
-  roll = ROLL,
-  fov = FOV,
-  speed = SPEED,
-  mode = 'scene',
-  onProjectionsComputed,
-}: ShapeViewerProps) {
+export interface ShapeViewerHandle {
+  calculateProjections: () => PolygonData[]
+}
+
+const ShapeViewer = forwardRef<ShapeViewerHandle, ShapeViewerProps>((
+  {
+    shapeName,
+    vertices,
+    faces,
+    gapSize = GAP,
+    pitch = PITCH,
+    yaw = YAW,
+    roll = ROLL,
+    fov = FOV,
+    speed = SPEED,
+    mode = 'scene',
+    onProjectionsComputed,
+  },
+  ref
+) => {
   const containerRef = useRef<HTMLDivElement>(null)
   const parentRef = useRef<HTMLDivElement>(null)
   const { theme } = useTheme()
@@ -329,7 +336,7 @@ export default function ShapeViewer({
     [vertices],
   )
 
-  const logFrontFaceProjections = useCallback(() => {
+  const calculateFaceProjections = useCallback(() => {
     const facesInfo = faces.map((face, i) => {
       const insetVerts = insetFace(face, animatedGap)
 
@@ -370,24 +377,24 @@ export default function ShapeViewer({
       return { faceIndex: i, vertices: verts2d, front: dot > 0 }
     })
 
-    try {
-      localStorage.setItem('shapeViewerProjections', JSON.stringify(facesInfo))
-      window.dispatchEvent(new Event('storage'))
-    } catch (e) {
-      console.error('Failed to save projections to localStorage:', e)
-    }
-
-    if (onProjectionsComputed) {
-      onProjectionsComputed(facesInfo)
-    }
+    return facesInfo
   }, [
     faces,
     projectVertex,
     cameraDistance,
     animatedGap,
     insetFace,
-    onProjectionsComputed,
   ])
+
+  useImperativeHandle(ref, () => ({
+    calculateProjections: () => {
+      const projections = calculateFaceProjections()
+      if (onProjectionsComputed) {
+        onProjectionsComputed(projections)
+      }
+      return projections
+    },
+  }), [calculateFaceProjections, onProjectionsComputed])
 
   useEffect(() => {
     updateCameraDistance()
@@ -892,37 +899,7 @@ export default function ShapeViewer({
     }
   }, [dimensions, cameraDistance, fieldOfView, fov])
 
-  useEffect(() => {
-    if (!containerRef.current) return
 
-    const observer = new IntersectionObserver(entries => {
-      const entry = entries[0]
-      if (entry.isIntersecting) {
-        logFrontFaceProjections()
-      }
-    })
-
-    observer.observe(containerRef.current)
-
-    return () => {
-      observer.disconnect()
-    }
-  }, [logFrontFaceProjections])
-
-  useEffect(() => {
-    if (containerRef.current) {
-      logFrontFaceProjections()
-    }
-  }, [
-    animatedPitch,
-    animatedYaw,
-    animatedRoll,
-    animatedGap,
-    cameraDistance,
-    fieldOfView,
-    dimensions,
-    logFrontFaceProjections,
-  ])
 
   return (
     <div
@@ -939,4 +916,8 @@ export default function ShapeViewer({
       />
     </div>
   )
-}
+})
+
+ShapeViewer.displayName = 'ShapeViewer'
+
+export default ShapeViewer

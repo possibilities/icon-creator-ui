@@ -626,7 +626,6 @@ export default function ShapeViewer({
       setMotionRotation({ pitch: 0, yaw: 0, roll: 0 })
 
       const animate = (currentTime: number) => {
-        const deltaTime = (currentTime - lastTimeRef.current) / 1000
         lastTimeRef.current = currentTime
 
         if (animParams.pauseDuration > 0 && pauseStartTimeRef.current > 0) {
@@ -645,24 +644,36 @@ export default function ShapeViewer({
         const degreesPerSecond = rotationSpeed * 6
 
         if (animParams.easingType === 'linear') {
-          const rotationDelta = degreesPerSecond * deltaTime
+          const elapsedTime =
+            (currentTime -
+              animationStartTimeRef.current -
+              totalPausedTimeRef.current) /
+            1000
+          const totalDegrees = degreesPerSecond * elapsedTime
+          const completedCycles = Math.floor(Math.abs(totalDegrees) / 360)
+          const currentProgress = (Math.abs(totalDegrees) % 360) / 360
+
+          const rotationAngle =
+            currentProgress === 0 && completedCycles > 0
+              ? completedCycles * 360 * Math.sign(totalDegrees)
+              : totalDegrees
 
           if (animParams.axisType === 'x') {
-            totalRotationRef.current.pitch += rotationDelta
+            totalRotationRef.current.pitch = rotationAngle
             setMotionRotation({
               pitch: totalRotationRef.current.pitch,
               yaw: 0,
               roll: 0,
             })
           } else if (animParams.axisType === 'y') {
-            totalRotationRef.current.yaw += rotationDelta
+            totalRotationRef.current.yaw = rotationAngle
             setMotionRotation({
               pitch: 0,
               yaw: totalRotationRef.current.yaw,
               roll: 0,
             })
           } else if (animParams.axisType === 'z') {
-            totalRotationRef.current.roll += rotationDelta
+            totalRotationRef.current.roll = rotationAngle
             setMotionRotation({
               pitch: 0,
               yaw: 0,
@@ -679,9 +690,9 @@ export default function ShapeViewer({
               const normalizedY = animParams.axisY / magnitude
               const normalizedZ = animParams.axisZ / magnitude
 
-              totalRotationRef.current.pitch += rotationDelta * normalizedX
-              totalRotationRef.current.yaw += rotationDelta * normalizedY
-              totalRotationRef.current.roll += rotationDelta * normalizedZ
+              totalRotationRef.current.pitch = rotationAngle * normalizedX
+              totalRotationRef.current.yaw = rotationAngle * normalizedY
+              totalRotationRef.current.roll = rotationAngle * normalizedZ
 
               setMotionRotation({
                 pitch: totalRotationRef.current.pitch,
@@ -692,24 +703,43 @@ export default function ShapeViewer({
           }
 
           if (animParams.pauseDuration > 0 && pauseStartTimeRef.current === 0) {
-            const totalRotation = Math.abs(
-              animParams.axisType === 'x'
-                ? totalRotationRef.current.pitch
-                : animParams.axisType === 'y'
-                  ? totalRotationRef.current.yaw
-                  : animParams.axisType === 'z'
-                    ? totalRotationRef.current.roll
-                    : Math.sqrt(
-                        totalRotationRef.current.pitch ** 2 +
-                          totalRotationRef.current.yaw ** 2 +
-                          totalRotationRef.current.roll ** 2,
-                      ),
-            )
-            const completedCycles = Math.floor(totalRotation / 360)
-            if (completedCycles > cycleCountRef.current) {
-              cycleCountRef.current = completedCycles
+            const currentCycles = Math.floor(Math.abs(rotationAngle) / 360)
+            if (currentCycles > cycleCountRef.current) {
+              cycleCountRef.current = currentCycles
               if (cycleCountRef.current % animParams.repeatCount === 0) {
                 pauseStartTimeRef.current = currentTime
+
+                const exactRotation =
+                  currentCycles * 360 * Math.sign(rotationAngle)
+                if (animParams.axisType === 'x') {
+                  totalRotationRef.current.pitch = exactRotation
+                  setMotionRotation({ pitch: exactRotation, yaw: 0, roll: 0 })
+                } else if (animParams.axisType === 'y') {
+                  totalRotationRef.current.yaw = exactRotation
+                  setMotionRotation({ pitch: 0, yaw: exactRotation, roll: 0 })
+                } else if (animParams.axisType === 'z') {
+                  totalRotationRef.current.roll = exactRotation
+                  setMotionRotation({ pitch: 0, yaw: 0, roll: exactRotation })
+                } else if (animParams.axisType === 'custom') {
+                  const magnitude = Math.sqrt(
+                    animParams.axisX * animParams.axisX +
+                      animParams.axisY * animParams.axisY +
+                      animParams.axisZ * animParams.axisZ,
+                  )
+                  if (magnitude > 0) {
+                    const normalizedX = animParams.axisX / magnitude
+                    const normalizedY = animParams.axisY / magnitude
+                    const normalizedZ = animParams.axisZ / magnitude
+                    totalRotationRef.current.pitch = exactRotation * normalizedX
+                    totalRotationRef.current.yaw = exactRotation * normalizedY
+                    totalRotationRef.current.roll = exactRotation * normalizedZ
+                    setMotionRotation({
+                      pitch: totalRotationRef.current.pitch,
+                      yaw: totalRotationRef.current.yaw,
+                      roll: totalRotationRef.current.roll,
+                    })
+                  }
+                }
               }
             }
           }
@@ -770,12 +800,18 @@ export default function ShapeViewer({
               easedProgress = easingFunc(currentRotationProgress)
           }
 
+          const clampedProgress = Math.min(1, Math.max(0, easedProgress))
           const completedRotations = Math.floor(targetRotations)
           const directionMultiplier =
             animParams.direction === 'reverse' ? -1 : 1
-          const rotationAngle =
-            (completedRotations * 360 + easedProgress * 360) *
-            directionMultiplier
+
+          const isAtRotationEnd =
+            targetRotations > 0 &&
+            Math.abs(targetRotations - Math.round(targetRotations)) < 0.0001
+          const rotationAngle = isAtRotationEnd
+            ? Math.round(targetRotations) * 360 * directionMultiplier
+            : (completedRotations * 360 + clampedProgress * 360) *
+              directionMultiplier
 
           if (animParams.axisType === 'x') {
             totalRotationRef.current.pitch = rotationAngle
@@ -830,6 +866,38 @@ export default function ShapeViewer({
               cycleCountRef.current = currentCycleCount
               if (currentCycleCount % animParams.repeatCount === 0) {
                 pauseStartTimeRef.current = currentTime
+
+                const exactRotation =
+                  currentCycleCount * 360 * directionMultiplier
+                if (animParams.axisType === 'x') {
+                  totalRotationRef.current.pitch = exactRotation
+                  setMotionRotation({ pitch: exactRotation, yaw: 0, roll: 0 })
+                } else if (animParams.axisType === 'y') {
+                  totalRotationRef.current.yaw = exactRotation
+                  setMotionRotation({ pitch: 0, yaw: exactRotation, roll: 0 })
+                } else if (animParams.axisType === 'z') {
+                  totalRotationRef.current.roll = exactRotation
+                  setMotionRotation({ pitch: 0, yaw: 0, roll: exactRotation })
+                } else if (animParams.axisType === 'custom') {
+                  const magnitude = Math.sqrt(
+                    animParams.axisX * animParams.axisX +
+                      animParams.axisY * animParams.axisY +
+                      animParams.axisZ * animParams.axisZ,
+                  )
+                  if (magnitude > 0) {
+                    const normalizedX = animParams.axisX / magnitude
+                    const normalizedY = animParams.axisY / magnitude
+                    const normalizedZ = animParams.axisZ / magnitude
+                    totalRotationRef.current.pitch = exactRotation * normalizedX
+                    totalRotationRef.current.yaw = exactRotation * normalizedY
+                    totalRotationRef.current.roll = exactRotation * normalizedZ
+                    setMotionRotation({
+                      pitch: totalRotationRef.current.pitch,
+                      yaw: totalRotationRef.current.yaw,
+                      roll: totalRotationRef.current.roll,
+                    })
+                  }
+                }
               }
             }
           }

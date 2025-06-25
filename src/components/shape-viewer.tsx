@@ -362,9 +362,6 @@ export default function ShapeViewer({
       return { faceIndex: i, vertices: verts2d, front: dot > 0 }
     })
 
-    const frontFaces = facesInfo.filter(f => f.front)
-    console.log('Front face projections', frontFaces)
-
     try {
       localStorage.setItem('shapeViewerProjections', JSON.stringify(facesInfo))
       window.dispatchEvent(new Event('storage'))

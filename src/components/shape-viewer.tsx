@@ -8,7 +8,6 @@ import { URL_PARAMS } from '@/lib/viewer-params'
 import { gapToScaleFactor } from '@/lib/polyhedra-client'
 import ClipperLib from 'clipper-lib'
 import { cssVarToX3dColor } from '@/lib/color'
-import { wrapAngle } from '@/lib/rotation-utils'
 
 interface ShapeViewerProps {
   shapeName: string
@@ -53,6 +52,11 @@ export default function ShapeViewer({
   const [animatedYaw, setAnimatedYaw] = useState(yaw)
   const [animatedPitch, setAnimatedPitch] = useState(pitch)
   const [animatedRoll, setAnimatedRoll] = useState(roll)
+  const [motionRotation, setMotionRotation] = useState({
+    pitch: 0,
+    yaw: 0,
+    roll: 0,
+  })
   const motionAnimationRef = useRef<number | undefined>(undefined)
   const lastTimeRef = useRef<number>(0)
   const rotationProgressRef = useRef<number>(0)
@@ -534,12 +538,14 @@ export default function ShapeViewer({
           <scene>
             <navigationinfo type='none' transitionType='"TELEPORT"' transitionTime='0'></navigationinfo>
             <viewpoint id='camera' orientation='0 1 0 0'></viewpoint>
-            <transform rotation='1 0 0 ${(animatedPitch * Math.PI) / 180}'>
-              <transform rotation='0 1 0 ${(animatedYaw * Math.PI) / 180}'>
-                <transform rotation='0 0 1 ${(animatedRoll * Math.PI) / 180}'>
-                  <group id='geometry-group'>
-                    ${geometryContent}
-                  </group>
+            <transform id='motion-transform' rotation='0 1 0 0'>
+              <transform rotation='1 0 0 ${(animatedPitch * Math.PI) / 180}'>
+                <transform rotation='0 1 0 ${(animatedYaw * Math.PI) / 180}'>
+                  <transform rotation='0 0 1 ${(animatedRoll * Math.PI) / 180}'>
+                    <group id='geometry-group'>
+                      ${geometryContent}
+                    </group>
+                  </transform>
                 </transform>
               </transform>
             </transform>
@@ -617,6 +623,7 @@ export default function ShapeViewer({
       cycleCountRef.current = 0
       totalRotationRef.current = { pitch: 0, yaw: 0, roll: 0 }
       totalPausedTimeRef.current = 0
+      setMotionRotation({ pitch: 0, yaw: 0, roll: 0 })
 
       const animate = (currentTime: number) => {
         const deltaTime = (currentTime - lastTimeRef.current) / 1000
@@ -642,19 +649,25 @@ export default function ShapeViewer({
 
           if (animParams.axisType === 'x') {
             totalRotationRef.current.pitch += rotationDelta
-            setAnimatedPitch(wrapAngle(pitch + totalRotationRef.current.pitch))
-            setAnimatedYaw(yaw)
-            setAnimatedRoll(roll)
+            setMotionRotation({
+              pitch: totalRotationRef.current.pitch,
+              yaw: 0,
+              roll: 0,
+            })
           } else if (animParams.axisType === 'y') {
             totalRotationRef.current.yaw += rotationDelta
-            setAnimatedPitch(pitch)
-            setAnimatedYaw(wrapAngle(yaw + totalRotationRef.current.yaw))
-            setAnimatedRoll(roll)
+            setMotionRotation({
+              pitch: 0,
+              yaw: totalRotationRef.current.yaw,
+              roll: 0,
+            })
           } else if (animParams.axisType === 'z') {
             totalRotationRef.current.roll += rotationDelta
-            setAnimatedPitch(pitch)
-            setAnimatedYaw(yaw)
-            setAnimatedRoll(wrapAngle(roll + totalRotationRef.current.roll))
+            setMotionRotation({
+              pitch: 0,
+              yaw: 0,
+              roll: totalRotationRef.current.roll,
+            })
           } else if (animParams.axisType === 'custom') {
             const magnitude = Math.sqrt(
               animParams.axisX * animParams.axisX +
@@ -670,11 +683,11 @@ export default function ShapeViewer({
               totalRotationRef.current.yaw += rotationDelta * normalizedY
               totalRotationRef.current.roll += rotationDelta * normalizedZ
 
-              setAnimatedPitch(
-                wrapAngle(pitch + totalRotationRef.current.pitch),
-              )
-              setAnimatedYaw(wrapAngle(yaw + totalRotationRef.current.yaw))
-              setAnimatedRoll(wrapAngle(roll + totalRotationRef.current.roll))
+              setMotionRotation({
+                pitch: totalRotationRef.current.pitch,
+                yaw: totalRotationRef.current.yaw,
+                roll: totalRotationRef.current.roll,
+              })
             }
           }
 
@@ -766,19 +779,25 @@ export default function ShapeViewer({
 
           if (animParams.axisType === 'x') {
             totalRotationRef.current.pitch = rotationAngle
-            setAnimatedPitch(wrapAngle(pitch + totalRotationRef.current.pitch))
-            setAnimatedYaw(yaw)
-            setAnimatedRoll(roll)
+            setMotionRotation({
+              pitch: totalRotationRef.current.pitch,
+              yaw: 0,
+              roll: 0,
+            })
           } else if (animParams.axisType === 'y') {
             totalRotationRef.current.yaw = rotationAngle
-            setAnimatedPitch(pitch)
-            setAnimatedYaw(wrapAngle(yaw + totalRotationRef.current.yaw))
-            setAnimatedRoll(roll)
+            setMotionRotation({
+              pitch: 0,
+              yaw: totalRotationRef.current.yaw,
+              roll: 0,
+            })
           } else if (animParams.axisType === 'z') {
             totalRotationRef.current.roll = rotationAngle
-            setAnimatedPitch(pitch)
-            setAnimatedYaw(yaw)
-            setAnimatedRoll(wrapAngle(roll + totalRotationRef.current.roll))
+            setMotionRotation({
+              pitch: 0,
+              yaw: 0,
+              roll: totalRotationRef.current.roll,
+            })
           } else if (animParams.axisType === 'custom') {
             const magnitude = Math.sqrt(
               animParams.axisX * animParams.axisX +
@@ -794,11 +813,11 @@ export default function ShapeViewer({
               totalRotationRef.current.yaw = rotationAngle * normalizedY
               totalRotationRef.current.roll = rotationAngle * normalizedZ
 
-              setAnimatedPitch(
-                wrapAngle(pitch + totalRotationRef.current.pitch),
-              )
-              setAnimatedYaw(wrapAngle(yaw + totalRotationRef.current.yaw))
-              setAnimatedRoll(wrapAngle(roll + totalRotationRef.current.roll))
+              setMotionRotation({
+                pitch: totalRotationRef.current.pitch,
+                yaw: totalRotationRef.current.yaw,
+                roll: totalRotationRef.current.roll,
+              })
             }
           }
 
@@ -824,6 +843,7 @@ export default function ShapeViewer({
       setAnimatedYaw(yaw)
       setAnimatedPitch(pitch)
       setAnimatedRoll(roll)
+      setMotionRotation({ pitch: 0, yaw: 0, roll: 0 })
       totalRotationRef.current = { pitch: 0, yaw: 0, roll: 0 }
     }
 
@@ -837,22 +857,50 @@ export default function ShapeViewer({
   useEffect(() => {
     if (!containerRef.current) return
 
+    const motionTransform =
+      containerRef.current.querySelector('#motion-transform')
     const transforms = containerRef.current.querySelectorAll('transform')
-    if (transforms.length >= 3) {
-      transforms[0].setAttribute(
+
+    if (motionTransform) {
+      if (
+        motionRotation.pitch !== 0 ||
+        motionRotation.yaw !== 0 ||
+        motionRotation.roll !== 0
+      ) {
+        const angle = Math.sqrt(
+          motionRotation.pitch ** 2 +
+            motionRotation.yaw ** 2 +
+            motionRotation.roll ** 2,
+        )
+        const axis = {
+          x: motionRotation.pitch / angle,
+          y: motionRotation.yaw / angle,
+          z: motionRotation.roll / angle,
+        }
+        motionTransform.setAttribute(
+          'rotation',
+          `${axis.x} ${axis.y} ${axis.z} ${(angle * Math.PI) / 180}`,
+        )
+      } else {
+        motionTransform.setAttribute('rotation', '0 1 0 0')
+      }
+    }
+
+    if (transforms.length >= 4) {
+      transforms[1].setAttribute(
         'rotation',
         `1 0 0 ${(animatedPitch * Math.PI) / 180}`,
       )
-      transforms[1].setAttribute(
+      transforms[2].setAttribute(
         'rotation',
         `0 1 0 ${(animatedYaw * Math.PI) / 180}`,
       )
-      transforms[2].setAttribute(
+      transforms[3].setAttribute(
         'rotation',
         `0 0 1 ${(animatedRoll * Math.PI) / 180}`,
       )
     }
-  }, [animatedPitch, animatedYaw, animatedRoll])
+  }, [animatedPitch, animatedYaw, animatedRoll, motionRotation])
 
   useEffect(() => {
     const x3dEl = containerRef.current?.querySelector(

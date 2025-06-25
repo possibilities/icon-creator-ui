@@ -130,7 +130,7 @@ export default function ShapeContainer({
     }
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (!e.shiftKey || e.repeat) return
+      if (!e.shiftKey || e.repeat || e.ctrlKey || e.metaKey) return
 
       const key = e.key.toUpperCase()
 

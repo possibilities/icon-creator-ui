@@ -50,6 +50,7 @@ export function SaveAnimationModal({
   const [darkGifUrl, setDarkGifUrl] = useState<string | null>(null)
   const [lightGifUrl, setLightGifUrl] = useState<string | null>(null)
   const [isDownloading, setIsDownloading] = useState(false)
+  const [gifKey, setGifKey] = useState(0)
   const searchParams = useSearchParams()
 
   useEffect(() => {
@@ -182,6 +183,7 @@ export function SaveAnimationModal({
 
       setDarkGifUrl(darkUrl)
       setLightGifUrl(lightUrl)
+      setGifKey(prev => prev + 1)
     } catch (error) {
       console.error('Failed to generate GIF previews:', error)
     } finally {
@@ -322,113 +324,107 @@ export function SaveAnimationModal({
   const PreviewContent = ({ isDark }: { isDark: boolean }) => {
     const gifUrl = isDark ? darkGifUrl : lightGifUrl
 
-    if (isGeneratingGif) {
+    if (!gifUrl) {
       return (
         <div className='w-full h-full flex items-center justify-center bg-muted/50'>
-          <div className='text-center'>
-            <div className='animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full mx-auto mb-2' />
-            <p className='text-sm text-muted-foreground'>
-              Generating animation...
-            </p>
-          </div>
+          <p className='text-sm text-muted-foreground'>No preview available</p>
         </div>
       )
     }
 
-    if (gifUrl) {
-      return (
-        <>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={gifUrl}
-            alt={`${isDark ? 'Dark' : 'Light'} mode animation`}
-            className='w-full h-full object-contain'
-            style={{
-              backgroundColor: isDark ? '#000' : '#fff',
-            }}
-          />
-        </>
-      )
-    }
-
     return (
-      <div className='w-full h-full flex items-center justify-center bg-muted/50'>
-        <p className='text-sm text-muted-foreground'>No preview available</p>
-      </div>
+      <>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={gifUrl}
+          alt={`${isDark ? 'Dark' : 'Light'} mode animation`}
+          className='w-full h-full object-contain'
+          style={{
+            backgroundColor: isDark ? '#000' : '#fff',
+          }}
+        />
+      </>
     )
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className='max-w-4xl'>
         <DialogHeader>
           <DialogTitle>Save Animation</DialogTitle>
         </DialogHeader>
 
-        <div className='grid grid-cols-2 gap-6 py-6'>
-          <Card
-            className='relative overflow-hidden cursor-pointer transition-colors hover:bg-accent/50'
-            onClick={() => setDarkSelected(!darkSelected)}
-          >
-            <CardContent className='p-0'>
-              <div className='flex justify-end px-4 pb-2'>
-                <Checkbox
-                  id='dark-mode'
-                  checked={darkSelected}
-                  onCheckedChange={checked => setDarkSelected(!!checked)}
-                  onClick={e => e.stopPropagation()}
-                />
-              </div>
-              <div className='p-4 pt-2'>
-                <div className='aspect-square'>
-                  <PreviewContent isDark={true} />
-                </div>
-              </div>
-              <div className='border-t' />
-              <div className='p-4 font-medium'>Dark</div>
-            </CardContent>
-          </Card>
+        {isGeneratingGif ? (
+          <div className='flex flex-col items-center justify-center py-16'>
+            <div className='animate-spin h-12 w-12 border-4 border-primary border-t-transparent rounded-full mb-4' />
+            <p className='text-lg text-muted-foreground'>
+              Generating animation...
+            </p>
+          </div>
+        ) : (
+          <>
+            <div className='grid grid-cols-2 gap-6 py-6'>
+              <Card
+                className='relative overflow-hidden cursor-pointer transition-colors hover:bg-accent/50'
+                onClick={() => setDarkSelected(!darkSelected)}
+              >
+                <CardContent className='p-0'>
+                  <div className='flex justify-end px-4 pb-2'>
+                    <Checkbox
+                      id='dark-mode'
+                      checked={darkSelected}
+                      onCheckedChange={checked => setDarkSelected(!!checked)}
+                      onClick={e => e.stopPropagation()}
+                    />
+                  </div>
+                  <div className='p-4 pt-2'>
+                    <div className='aspect-square' key={`dark-${gifKey}`}>
+                      <PreviewContent isDark={true} />
+                    </div>
+                  </div>
+                  <div className='border-t' />
+                  <div className='p-4 font-medium'>Dark</div>
+                </CardContent>
+              </Card>
 
-          <Card
-            className='relative overflow-hidden cursor-pointer transition-colors hover:bg-accent/50'
-            onClick={() => setLightSelected(!lightSelected)}
-          >
-            <CardContent className='p-0'>
-              <div className='flex justify-end px-4 pb-2'>
-                <Checkbox
-                  id='light-mode'
-                  checked={lightSelected}
-                  onCheckedChange={checked => setLightSelected(!!checked)}
-                  onClick={e => e.stopPropagation()}
-                />
-              </div>
-              <div className='p-4 pt-2'>
-                <div className='aspect-square'>
-                  <PreviewContent isDark={false} />
-                </div>
-              </div>
-              <div className='border-t' />
-              <div className='p-4 font-medium'>Light</div>
-            </CardContent>
-          </Card>
-        </div>
+              <Card
+                className='relative overflow-hidden cursor-pointer transition-colors hover:bg-accent/50'
+                onClick={() => setLightSelected(!lightSelected)}
+              >
+                <CardContent className='p-0'>
+                  <div className='flex justify-end px-4 pb-2'>
+                    <Checkbox
+                      id='light-mode'
+                      checked={lightSelected}
+                      onCheckedChange={checked => setLightSelected(!!checked)}
+                      onClick={e => e.stopPropagation()}
+                    />
+                  </div>
+                  <div className='p-4 pt-2'>
+                    <div className='aspect-square' key={`light-${gifKey}`}>
+                      <PreviewContent isDark={false} />
+                    </div>
+                  </div>
+                  <div className='border-t' />
+                  <div className='p-4 font-medium'>Light</div>
+                </CardContent>
+              </Card>
+            </div>
 
-        <DialogFooter>
-          <Button variant='outline' onClick={onClose}>
-            Cancel
-          </Button>
-          <Button
-            onClick={handleSave}
-            disabled={
-              (!darkSelected && !lightSelected) ||
-              isGeneratingGif ||
-              isDownloading
-            }
-          >
-            <Download className='mr-1 h-4 w-4' />
-            {isDownloading ? 'Downloading...' : 'Save Animation'}
-          </Button>
-        </DialogFooter>
+            <DialogFooter>
+              <Button variant='outline' onClick={handleClose}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSave}
+                disabled={(!darkSelected && !lightSelected) || isDownloading}
+              >
+                <Download className='mr-1 h-4 w-4' />
+                {isDownloading ? 'Downloading...' : 'Save Animation'}
+              </Button>
+            </DialogFooter>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   )

@@ -8,8 +8,8 @@ import './debug.css'
 import './x3dom.css'
 
 export const metadata: Metadata = {
-  title: 'Icon Creator',
-  description: 'Icon Creator',
+  title: '3D Icon Creator',
+  description: '3D Icon Creator',
 }
 
 export default function RootLayout({

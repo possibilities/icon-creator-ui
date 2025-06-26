@@ -1,7 +1,7 @@
 {
-  "name": "icon-creator",
+  "name": "3d-icon-creator",
   "version": "0.1.0",
-  "description": "Icon Creator",
+  "description": "3D Icon Creator",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",

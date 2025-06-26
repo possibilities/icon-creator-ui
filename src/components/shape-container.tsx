@@ -258,7 +258,7 @@ export default function ShapeContainer({
       <SaveAnimationModal
         isOpen={isAnimationModalOpen}
         onClose={() => setIsAnimationModalOpen(false)}
-        shapeName={shapeName}
+        projections={projections}
       />
     </>
   )

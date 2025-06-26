@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -12,26 +12,51 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Download } from 'lucide-react'
-
-interface PolygonData {
-  faceIndex: number
-  vertices: { x: number; y: number }[]
-  front: boolean
-}
+import { calculateProjections, type PolygonData } from '@/lib/projection-engine'
 
 interface SaveIconsModalProps {
   isOpen: boolean
   onClose: () => void
-  projections: PolygonData[]
+  vertices: number[][]
+  faces: number[][]
+  pitch: number
+  yaw: number
+  roll: number
+  gap: number
+  fov: number
 }
 
 export function SaveIconsModal({
   isOpen,
   onClose,
-  projections,
+  vertices,
+  faces,
+  pitch,
+  yaw,
+  roll,
+  gap,
+  fov,
 }: SaveIconsModalProps) {
   const [darkSelected, setDarkSelected] = useState(true)
   const [lightSelected, setLightSelected] = useState(true)
+  const [projections, setProjections] = useState<PolygonData[]>([])
+
+  useEffect(() => {
+    if (isOpen && vertices.length > 0 && faces.length > 0) {
+      const newProjections = calculateProjections({
+        vertices,
+        faces,
+        pitch,
+        yaw,
+        roll,
+        gap,
+        width: 400,
+        height: 400,
+        fov,
+      })
+      setProjections(newProjections)
+    }
+  }, [isOpen, vertices, faces, pitch, yaw, roll, gap, fov])
 
   const handleSave = () => {
     console.log('Saving icons...', { darkSelected, lightSelected })

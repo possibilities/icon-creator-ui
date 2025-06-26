@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import ShapeSidebar from './shape-sidebar'
-import ShapeViewer, { type ShapeViewerHandle } from './shape-viewer'
+import ShapeViewer from './shape-viewer'
 import { FabContainer } from './fab-container'
 import { SaveIconsModal } from './save-icons-modal'
 import { SaveAnimationModal } from './save-animation-modal'
@@ -11,12 +11,6 @@ import { GAP, FOV, SPEED, PITCH, YAW, ROLL } from '@/lib/viewer-defaults'
 import { URL_PARAMS } from '@/lib/viewer-params'
 import { debounce } from '@/lib/url-helpers'
 import { wrapAngle } from '@/lib/rotation-utils'
-
-interface PolygonData {
-  faceIndex: number
-  vertices: { x: number; y: number }[]
-  front: boolean
-}
 
 interface ShapeContainerProps {
   shapes: string[]
@@ -52,8 +46,6 @@ export default function ShapeContainer({
 
   const [isIconsModalOpen, setIsIconsModalOpen] = useState(false)
   const [isAnimationModalOpen, setIsAnimationModalOpen] = useState(false)
-  const [projections, setProjections] = useState<PolygonData[]>([])
-  const shapeViewerRef = useRef<ShapeViewerHandle>(null)
 
   const updateURL = useCallback(
     (updates: Record<string, number>) => {
@@ -197,13 +189,6 @@ export default function ShapeContainer({
 
   const handleDownloadClick = () => {
     setIsIconsModalOpen(true)
-    // Calculate projections after modal opens for responsiveness
-    setTimeout(() => {
-      if (shapeViewerRef.current) {
-        const newProjections = shapeViewerRef.current.calculateProjections()
-        setProjections(newProjections)
-      }
-    }, 0)
   }
 
   const handleAnimationSaveClick = () => {
@@ -228,7 +213,6 @@ export default function ShapeContainer({
       />
       <div className='w-full h-screen'>
         <ShapeViewer
-          ref={shapeViewerRef}
           key={shapeName}
           shapeName={shapeName}
           vertices={vertices}
@@ -252,13 +236,25 @@ export default function ShapeContainer({
       <SaveIconsModal
         isOpen={isIconsModalOpen}
         onClose={() => setIsIconsModalOpen(false)}
-        projections={projections}
+        vertices={vertices}
+        faces={faces}
+        pitch={pitch}
+        yaw={yaw}
+        roll={roll}
+        gap={gap}
+        fov={fov}
       />
 
       <SaveAnimationModal
         isOpen={isAnimationModalOpen}
         onClose={() => setIsAnimationModalOpen(false)}
-        projections={projections}
+        vertices={vertices}
+        faces={faces}
+        pitch={pitch}
+        yaw={yaw}
+        roll={roll}
+        gap={gap}
+        fov={fov}
       />
     </>
   )

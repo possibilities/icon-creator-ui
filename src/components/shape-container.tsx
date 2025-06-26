@@ -210,7 +210,6 @@ export default function ShapeContainer({
     setIsAnimationModalOpen(true)
   }
 
-
   return (
     <>
       <ShapeSidebar

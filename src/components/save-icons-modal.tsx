@@ -114,7 +114,7 @@ export function SaveIconsModal({
                 </div>
               </div>
               <div className='border-t' />
-              <div className='p-4 font-medium'>Dark Mode</div>
+              <div className='p-4 font-medium'>Dark</div>
             </CardContent>
           </Card>
 
@@ -137,7 +137,7 @@ export function SaveIconsModal({
                 </div>
               </div>
               <div className='border-t' />
-              <div className='p-4 font-medium'>Light Mode</div>
+              <div className='p-4 font-medium'>Light</div>
             </CardContent>
           </Card>
         </div>

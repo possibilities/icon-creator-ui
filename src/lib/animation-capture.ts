@@ -109,56 +109,40 @@ export function captureAnimationFrames(
       z: animationParams.axisZ / axisLength,
     }
 
-    const rad = (rotationAngle * Math.PI) / 180
-    const cos = Math.cos(rad)
-    const sin = Math.sin(rad)
-    const oneMinusCos = 1 - cos
+    let animatedPitch = basePitch
+    let animatedYaw = baseYaw
+    let animatedRoll = baseRoll
 
-    const rotationMatrix = [
-      [
-        cos + normalizedAxis.x * normalizedAxis.x * oneMinusCos,
-        normalizedAxis.x * normalizedAxis.y * oneMinusCos -
-          normalizedAxis.z * sin,
-        normalizedAxis.x * normalizedAxis.z * oneMinusCos +
-          normalizedAxis.y * sin,
-      ],
-      [
-        normalizedAxis.y * normalizedAxis.x * oneMinusCos +
-          normalizedAxis.z * sin,
-        cos + normalizedAxis.y * normalizedAxis.y * oneMinusCos,
-        normalizedAxis.y * normalizedAxis.z * oneMinusCos -
-          normalizedAxis.x * sin,
-      ],
-      [
-        normalizedAxis.z * normalizedAxis.x * oneMinusCos -
-          normalizedAxis.y * sin,
-        normalizedAxis.z * normalizedAxis.y * oneMinusCos +
-          normalizedAxis.x * sin,
-        cos + normalizedAxis.z * normalizedAxis.z * oneMinusCos,
-      ],
-    ]
-
-    const animatedVertices = vertices.map(vertex => {
-      const [x, y, z] = vertex
-      return [
-        rotationMatrix[0][0] * x +
-          rotationMatrix[0][1] * y +
-          rotationMatrix[0][2] * z,
-        rotationMatrix[1][0] * x +
-          rotationMatrix[1][1] * y +
-          rotationMatrix[1][2] * z,
-        rotationMatrix[2][0] * x +
-          rotationMatrix[2][1] * y +
-          rotationMatrix[2][2] * z,
-      ]
-    })
+    if (
+      animationParams.axisX === 1 &&
+      animationParams.axisY === 0 &&
+      animationParams.axisZ === 0
+    ) {
+      animatedPitch = basePitch + rotationAngle
+    } else if (
+      animationParams.axisX === 0 &&
+      animationParams.axisY === 1 &&
+      animationParams.axisZ === 0
+    ) {
+      animatedYaw = baseYaw + rotationAngle
+    } else if (
+      animationParams.axisX === 0 &&
+      animationParams.axisY === 0 &&
+      animationParams.axisZ === 1
+    ) {
+      animatedRoll = baseRoll + rotationAngle
+    } else {
+      animatedPitch = basePitch + rotationAngle * normalizedAxis.x
+      animatedYaw = baseYaw + rotationAngle * normalizedAxis.y
+      animatedRoll = baseRoll + rotationAngle * normalizedAxis.z
+    }
 
     const projections = calculateProjections({
-      vertices: animatedVertices,
+      vertices,
       faces,
-      pitch: basePitch,
-      yaw: baseYaw,
-      roll: baseRoll,
+      pitch: animatedPitch,
+      yaw: animatedYaw,
+      roll: animatedRoll,
       gap,
       width: 400,
       height: 400,

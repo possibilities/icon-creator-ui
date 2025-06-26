@@ -252,7 +252,6 @@ export default function ShapeContainer({
       <SaveIconsModal
         isOpen={isIconsModalOpen}
         onClose={() => setIsIconsModalOpen(false)}
-        shapeName={shapeName}
         projections={projections}
       />
 

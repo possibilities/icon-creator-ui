@@ -11,6 +11,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Download } from 'lucide-react'
 
 interface PolygonData {
   faceIndex: number
@@ -21,14 +22,12 @@ interface PolygonData {
 interface SaveIconsModalProps {
   isOpen: boolean
   onClose: () => void
-  shapeName: string
   projections: PolygonData[]
 }
 
 export function SaveIconsModal({
   isOpen,
   onClose,
-  shapeName,
   projections,
 }: SaveIconsModalProps) {
   const [darkSelected, setDarkSelected] = useState(true)
@@ -92,39 +91,53 @@ export function SaveIconsModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className='max-w-4xl'>
         <DialogHeader>
-          <DialogTitle>Save Icons - {shapeName}</DialogTitle>
+          <DialogTitle>Save Icons</DialogTitle>
         </DialogHeader>
 
         <div className='grid grid-cols-2 gap-6 py-6'>
-          <Card className='relative overflow-hidden'>
-            <div className='absolute top-4 right-4 z-10'>
-              <Checkbox
-                id='dark-mode'
-                checked={darkSelected}
-                onCheckedChange={checked => setDarkSelected(!!checked)}
-              />
-            </div>
+          <Card
+            className='relative overflow-hidden cursor-pointer transition-colors hover:bg-accent/50'
+            onClick={() => setDarkSelected(!darkSelected)}
+          >
             <CardContent className='p-0'>
-              <div className='aspect-square'>
-                <SVGPreview isDark={true} />
+              <div className='flex justify-end px-4 pb-2'>
+                <Checkbox
+                  id='dark-mode'
+                  checked={darkSelected}
+                  onCheckedChange={checked => setDarkSelected(!!checked)}
+                  onClick={e => e.stopPropagation()}
+                />
               </div>
-              <div className='p-4 text-center font-medium'>Dark Mode</div>
+              <div className='p-4 pt-2'>
+                <div className='aspect-square'>
+                  <SVGPreview isDark={true} />
+                </div>
+              </div>
+              <div className='border-t' />
+              <div className='p-4 font-medium'>Dark Mode</div>
             </CardContent>
           </Card>
 
-          <Card className='relative overflow-hidden'>
-            <div className='absolute top-4 right-4 z-10'>
-              <Checkbox
-                id='light-mode'
-                checked={lightSelected}
-                onCheckedChange={checked => setLightSelected(!!checked)}
-              />
-            </div>
+          <Card
+            className='relative overflow-hidden cursor-pointer transition-colors hover:bg-accent/50'
+            onClick={() => setLightSelected(!lightSelected)}
+          >
             <CardContent className='p-0'>
-              <div className='aspect-square'>
-                <SVGPreview isDark={false} />
+              <div className='flex justify-end px-4 pb-2'>
+                <Checkbox
+                  id='light-mode'
+                  checked={lightSelected}
+                  onCheckedChange={checked => setLightSelected(!!checked)}
+                  onClick={e => e.stopPropagation()}
+                />
               </div>
-              <div className='p-4 text-center font-medium'>Light Mode</div>
+              <div className='p-4 pt-2'>
+                <div className='aspect-square'>
+                  <SVGPreview isDark={false} />
+                </div>
+              </div>
+              <div className='border-t' />
+              <div className='p-4 font-medium'>Light Mode</div>
             </CardContent>
           </Card>
         </div>
@@ -137,7 +150,8 @@ export function SaveIconsModal({
             onClick={handleSave}
             disabled={!darkSelected && !lightSelected}
           >
-            Save Selected
+            <Download className='mr-1 h-4 w-4' />
+            Save Icons
           </Button>
         </DialogFooter>
       </DialogContent>

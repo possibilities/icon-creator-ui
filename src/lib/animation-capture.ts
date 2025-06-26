@@ -1,0 +1,176 @@
+import { calculateProjections, type PolygonData } from '@/lib/projection-engine'
+
+export interface AnimationFrame {
+  projections: PolygonData[]
+  timestamp: number
+  rotationAngle: number
+}
+
+export interface AnimationParams {
+  rotationSpeed: number
+  easingType: string
+  easingStrength?: number
+  overshoot?: number
+  bounces?: number
+  steps?: number
+  stepDuration?: number
+  pauseDuration?: number
+  axisX: number
+  axisY: number
+  axisZ: number
+  direction: 'forward' | 'backward'
+}
+
+function easeLinear(t: number): number {
+  return t
+}
+
+function easeInOut(t: number, strength: number = 2): number {
+  if (t < 0.5) {
+    return Math.pow(2 * t, strength) / 2
+  } else {
+    return 1 - Math.pow(2 * (1 - t), strength) / 2
+  }
+}
+
+function easeElastic(
+  t: number,
+  overshoot: number = 20,
+  bounces: number = 1,
+): number {
+  if (t === 0 || t === 1) return t
+  const p = 1 / (bounces + 0.5)
+  const a = overshoot / 360
+  const s = (p / (2 * Math.PI)) * Math.asin(1 / (1 + a))
+  return (
+    1 + (1 + a) * Math.pow(2, -10 * t) * Math.sin(((t - s) * (2 * Math.PI)) / p)
+  )
+}
+
+function applyEasing(t: number, params: AnimationParams): number {
+  switch (params.easingType) {
+    case 'linear':
+      return easeLinear(t)
+    case 'ease-in-out':
+      return easeInOut(t, params.easingStrength || 2)
+    case 'elastic':
+      return easeElastic(t, params.overshoot || 20, params.bounces || 1)
+    default:
+      return t
+  }
+}
+
+export function captureAnimationFrames(
+  vertices: number[][],
+  faces: number[][],
+  basePitch: number,
+  baseYaw: number,
+  baseRoll: number,
+  gap: number,
+  fov: number,
+  animationParams: AnimationParams,
+  frameRate: number = 30,
+): AnimationFrame[] {
+  const frames: AnimationFrame[] = []
+
+  const degreesPerSecond = animationParams.rotationSpeed * 6
+  const rotationDuration = 360 / degreesPerSecond
+  const totalDuration = rotationDuration + (animationParams.pauseDuration || 0)
+  const frameInterval = 1000 / frameRate
+  const totalFrames = Math.ceil((totalDuration * 1000) / frameInterval)
+
+  for (let i = 0; i < totalFrames; i++) {
+    const timestamp = i * frameInterval
+    const timeInSeconds = timestamp / 1000
+
+    let rotationAngle = 0
+
+    if (timeInSeconds < rotationDuration) {
+      const progress = timeInSeconds / rotationDuration
+      const easedProgress = applyEasing(progress, animationParams)
+      rotationAngle = easedProgress * 360
+
+      if (animationParams.direction === 'backward') {
+        rotationAngle = 360 - rotationAngle
+      }
+    } else {
+      rotationAngle = animationParams.direction === 'backward' ? 0 : 360
+    }
+
+    const axisLength = Math.sqrt(
+      animationParams.axisX ** 2 +
+        animationParams.axisY ** 2 +
+        animationParams.axisZ ** 2,
+    )
+
+    const normalizedAxis = {
+      x: animationParams.axisX / axisLength,
+      y: animationParams.axisY / axisLength,
+      z: animationParams.axisZ / axisLength,
+    }
+
+    const rad = (rotationAngle * Math.PI) / 180
+    const cos = Math.cos(rad)
+    const sin = Math.sin(rad)
+    const oneMinusCos = 1 - cos
+
+    const rotationMatrix = [
+      [
+        cos + normalizedAxis.x * normalizedAxis.x * oneMinusCos,
+        normalizedAxis.x * normalizedAxis.y * oneMinusCos -
+          normalizedAxis.z * sin,
+        normalizedAxis.x * normalizedAxis.z * oneMinusCos +
+          normalizedAxis.y * sin,
+      ],
+      [
+        normalizedAxis.y * normalizedAxis.x * oneMinusCos +
+          normalizedAxis.z * sin,
+        cos + normalizedAxis.y * normalizedAxis.y * oneMinusCos,
+        normalizedAxis.y * normalizedAxis.z * oneMinusCos -
+          normalizedAxis.x * sin,
+      ],
+      [
+        normalizedAxis.z * normalizedAxis.x * oneMinusCos -
+          normalizedAxis.y * sin,
+        normalizedAxis.z * normalizedAxis.y * oneMinusCos +
+          normalizedAxis.x * sin,
+        cos + normalizedAxis.z * normalizedAxis.z * oneMinusCos,
+      ],
+    ]
+
+    const animatedVertices = vertices.map(vertex => {
+      const [x, y, z] = vertex
+      return [
+        rotationMatrix[0][0] * x +
+          rotationMatrix[0][1] * y +
+          rotationMatrix[0][2] * z,
+        rotationMatrix[1][0] * x +
+          rotationMatrix[1][1] * y +
+          rotationMatrix[1][2] * z,
+        rotationMatrix[2][0] * x +
+          rotationMatrix[2][1] * y +
+          rotationMatrix[2][2] * z,
+      ]
+    })
+
+    const projections = calculateProjections({
+      vertices: animatedVertices,
+      faces,
+      pitch: basePitch,
+      yaw: baseYaw,
+      roll: baseRoll,
+      gap,
+      width: 400,
+      height: 400,
+      fov,
+    })
+
+    frames.push({
+      projections,
+      timestamp,
+      rotationAngle,
+    })
+  }
+
+  return frames
+}

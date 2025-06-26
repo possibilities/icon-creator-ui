@@ -90,7 +90,32 @@ export function SaveAnimationModal({
       30,
     )
 
-    const generateGif = async (isDark: boolean): Promise<string> => {
+    let globalMinX = Infinity
+    let globalMinY = Infinity
+    let globalMaxX = -Infinity
+    let globalMaxY = -Infinity
+
+    frames.forEach(frame => {
+      const frontFacing = frame.projections.filter(p => p.front)
+      frontFacing.forEach(polygon => {
+        polygon.vertices.forEach(({ x, y }) => {
+          const roundedX = Math.round(x * 10) / 10
+          const roundedY = Math.round(y * 10) / 10
+          globalMinX = Math.min(globalMinX, roundedX)
+          globalMinY = Math.min(globalMinY, roundedY)
+          globalMaxX = Math.max(globalMaxX, roundedX)
+          globalMaxY = Math.max(globalMaxY, roundedY)
+        })
+      })
+    })
+
+    const padding = 50
+    const globalViewBox = `${globalMinX - padding} ${globalMinY - padding} ${globalMaxX - globalMinX + 2 * padding} ${globalMaxY - globalMinY + 2 * padding}`
+
+    const generateGif = async (
+      isDark: boolean,
+      viewBox: string,
+    ): Promise<string> => {
       return new Promise(async (resolve, reject) => {
         const gif = new GIF({
           workers: 2,
@@ -108,9 +133,6 @@ export function SaveAnimationModal({
         let loadedFrames = 0
 
         for (const frame of frames) {
-          const viewBox = calculateViewBox(
-            frame.projections.filter(p => p.front),
-          )
           const svgString = generateSVGString(
             frame.projections,
             isDark,
@@ -154,8 +176,8 @@ export function SaveAnimationModal({
 
     try {
       const [darkUrl, lightUrl] = await Promise.all([
-        generateGif(true),
-        generateGif(false),
+        generateGif(true, globalViewBox),
+        generateGif(false, globalViewBox),
       ])
 
       setDarkGifUrl(darkUrl)
@@ -268,7 +290,7 @@ export function SaveAnimationModal({
 
   const polygonToPath = (vertices: { x: number; y: number }[]): string => {
     if (vertices.length === 0) return ''
-    return `M ${vertices.map(({ x, y }) => `${x},${y}`).join(' L ')} Z`
+    return `M ${vertices.map(({ x, y }) => `${Math.round(x * 10) / 10},${Math.round(y * 10) / 10}`).join(' L ')} Z`
   }
 
   const generateSVGString = (

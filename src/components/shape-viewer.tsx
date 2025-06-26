@@ -21,6 +21,7 @@ interface ShapeViewerProps {
   fov?: number
   speed?: number
   mode?: string
+  paused?: boolean
 }
 
 const ShapeViewer = ({
@@ -34,6 +35,7 @@ const ShapeViewer = ({
   fov = FOV,
   speed = SPEED,
   mode = 'scene',
+  paused = false,
 }: ShapeViewerProps) => {
   const containerRef = useRef<HTMLDivElement>(null)
   const parentRef = useRef<HTMLDivElement>(null)
@@ -507,7 +509,7 @@ const ShapeViewer = ({
       motionAnimationRef.current = undefined
     }
 
-    if (mode === 'motion' && speed > 0) {
+    if (mode === 'motion' && speed > 0 && !paused) {
       const animParams = getAnimationParams()
       const startTime = performance.now()
       lastTimeRef.current = startTime
@@ -732,7 +734,16 @@ const ShapeViewer = ({
         cancelAnimationFrame(motionAnimationRef.current)
       }
     }
-  }, [mode, speed, yaw, pitch, roll, getAnimationParams, easingFunctions])
+  }, [
+    mode,
+    speed,
+    yaw,
+    pitch,
+    roll,
+    getAnimationParams,
+    easingFunctions,
+    paused,
+  ])
 
   useEffect(() => {
     if (!containerRef.current) return

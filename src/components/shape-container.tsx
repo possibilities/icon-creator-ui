@@ -224,6 +224,7 @@ export default function ShapeContainer({
           fov={fov}
           speed={speed}
           mode={mode}
+          paused={isAnimationModalOpen}
         />
       </div>
 

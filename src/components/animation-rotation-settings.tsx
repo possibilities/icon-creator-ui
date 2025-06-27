@@ -106,6 +106,9 @@ export function AnimationRotationSettings() {
             value={[localSpeed]}
             onValueChange={([value]) => {
               setLocalSpeed(value)
+            }}
+            onValueCommit={([value]) => {
+              setLocalSpeed(value)
               updateURL({ [URL_PARAMS.SPEED]: value.toString() })
             }}
             min={1}
@@ -171,6 +174,9 @@ export function AnimationRotationSettings() {
                 value={[localAxisX]}
                 onValueChange={([value]) => {
                   setLocalAxisX(value)
+                }}
+                onValueCommit={([value]) => {
+                  setLocalAxisX(value)
                   handleCustomAxisChange('x', value)
                 }}
                 min={0}
@@ -195,6 +201,9 @@ export function AnimationRotationSettings() {
                 value={[localAxisY]}
                 onValueChange={([value]) => {
                   setLocalAxisY(value)
+                }}
+                onValueCommit={([value]) => {
+                  setLocalAxisY(value)
                   handleCustomAxisChange('y', value)
                 }}
                 min={0}
@@ -218,6 +227,9 @@ export function AnimationRotationSettings() {
               <WideTargetSlider
                 value={[localAxisZ]}
                 onValueChange={([value]) => {
+                  setLocalAxisZ(value)
+                }}
+                onValueCommit={([value]) => {
                   setLocalAxisZ(value)
                   handleCustomAxisChange('z', value)
                 }}

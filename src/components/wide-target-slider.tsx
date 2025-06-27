@@ -6,6 +6,7 @@ import { Slider } from '@/components/ui/slider'
 interface WideTargetSliderProps extends React.ComponentProps<typeof Slider> {
   value?: number[]
   onValueChange?: (value: number[]) => void
+  onValueCommit?: (value: number[]) => void
   min?: number
   max?: number
   step?: number
@@ -14,6 +15,7 @@ interface WideTargetSliderProps extends React.ComponentProps<typeof Slider> {
 export function WideTargetSlider({
   value = [0],
   onValueChange,
+  onValueCommit,
   min = 0,
   max = 100,
   step = 1,
@@ -22,7 +24,7 @@ export function WideTargetSlider({
   const sliderRef = React.useRef<HTMLDivElement>(null)
 
   const handleWrapperClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!onValueChange || !sliderRef.current) return
+    if (!sliderRef.current) return
 
     const target = e.target as HTMLElement
     if (target.closest('[data-slot="slider"]')) {
@@ -38,7 +40,12 @@ export function WideTargetSlider({
     const steppedValue = Math.round(rawValue / step) * step
     const clampedValue = Math.max(min, Math.min(max, steppedValue))
 
-    onValueChange([clampedValue])
+    if (onValueChange) {
+      onValueChange([clampedValue])
+    }
+    if (onValueCommit) {
+      onValueCommit([clampedValue])
+    }
   }
 
   return (
@@ -46,6 +53,7 @@ export function WideTargetSlider({
       <Slider
         value={value}
         onValueChange={onValueChange}
+        onValueCommit={onValueCommit}
         min={min}
         max={max}
         step={step}

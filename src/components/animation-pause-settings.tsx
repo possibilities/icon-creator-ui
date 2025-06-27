@@ -84,6 +84,9 @@ export function AnimationPauseSettings() {
                 value={[localRepeatCount]}
                 onValueChange={([value]) => {
                   setLocalRepeatCount(value)
+                }}
+                onValueCommit={([value]) => {
+                  setLocalRepeatCount(value)
                   updateURL({ [URL_PARAMS.REPEAT_COUNT]: value })
                 }}
                 min={1}
@@ -107,6 +110,9 @@ export function AnimationPauseSettings() {
               <WideTargetSlider
                 value={[localPauseDuration]}
                 onValueChange={([value]) => {
+                  setLocalPauseDuration(value)
+                }}
+                onValueCommit={([value]) => {
                   setLocalPauseDuration(value)
                   updateURL({ [URL_PARAMS.PAUSE_DURATION]: value })
                 }}

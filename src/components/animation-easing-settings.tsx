@@ -116,6 +116,9 @@ export function AnimationEasingSettings() {
               value={[localEasingStrength]}
               onValueChange={([value]) => {
                 setLocalEasingStrength(value)
+              }}
+              onValueCommit={([value]) => {
+                setLocalEasingStrength(value)
                 updateURL(URL_PARAMS.EASING_STRENGTH, value)
               }}
               min={0.5}
@@ -147,6 +150,9 @@ export function AnimationEasingSettings() {
               value={[localOvershoot]}
               onValueChange={([value]) => {
                 setLocalOvershoot(value)
+              }}
+              onValueCommit={([value]) => {
+                setLocalOvershoot(value)
                 updateURL(URL_PARAMS.OVERSHOOT, value)
               }}
               min={0}
@@ -177,6 +183,9 @@ export function AnimationEasingSettings() {
             <WideTargetSlider
               value={[localBounces]}
               onValueChange={([value]) => {
+                setLocalBounces(value)
+              }}
+              onValueCommit={([value]) => {
                 setLocalBounces(value)
                 updateURL(URL_PARAMS.BOUNCES, value)
               }}
@@ -210,6 +219,9 @@ export function AnimationEasingSettings() {
                 value={[localSteps]}
                 onValueChange={([value]) => {
                   setLocalSteps(value)
+                }}
+                onValueCommit={([value]) => {
+                  setLocalSteps(value)
                   updateURL(URL_PARAMS.STEPS, value)
                 }}
                 min={2}
@@ -237,6 +249,9 @@ export function AnimationEasingSettings() {
               <WideTargetSlider
                 value={[localStepDuration]}
                 onValueChange={([value]) => {
+                  setLocalStepDuration(value)
+                }}
+                onValueCommit={([value]) => {
                   setLocalStepDuration(value)
                   updateURL(URL_PARAMS.STEP_DURATION, value)
                 }}

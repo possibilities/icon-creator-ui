@@ -42,7 +42,9 @@ export default function ShapeContainer({
   const [yaw, setYaw] = useState(() => getInitialValue(URL_PARAMS.YAW, YAW))
   const [roll, setRoll] = useState(() => getInitialValue(URL_PARAMS.ROLL, ROLL))
   const [fov, setFov] = useState(() => getInitialValue(URL_PARAMS.FOV, FOV))
-  const [speed] = useState(() => getInitialValue(URL_PARAMS.SPEED, SPEED))
+  const [speed, setSpeed] = useState(() =>
+    getInitialValue(URL_PARAMS.SPEED, SPEED),
+  )
 
   const [isIconsModalOpen, setIsIconsModalOpen] = useState(false)
   const [isAnimationModalOpen, setIsAnimationModalOpen] = useState(false)
@@ -86,15 +88,21 @@ export default function ShapeContainer({
   )
 
   useEffect(() => {
+    const urlSpeed = getInitialValue(URL_PARAMS.SPEED, SPEED)
+    if (urlSpeed !== speed) {
+      setSpeed(urlSpeed)
+    }
+  }, [searchParams, speed])
+
+  useEffect(() => {
     debouncedUpdateURL({
       [URL_PARAMS.GAP]: gap,
       [URL_PARAMS.PITCH]: pitch,
       [URL_PARAMS.YAW]: yaw,
       [URL_PARAMS.ROLL]: roll,
       [URL_PARAMS.FOV]: fov,
-      [URL_PARAMS.SPEED]: speed,
     })
-  }, [gap, pitch, yaw, roll, fov, speed, debouncedUpdateURL])
+  }, [gap, pitch, yaw, roll, fov, debouncedUpdateURL])
 
   useEffect(() => {
     const keysPressed = new Set<string>()

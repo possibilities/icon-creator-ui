@@ -25,7 +25,7 @@ export function KeyboardShortcutsButton() {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [])
+  }, [setOpen])
 
   return (
     <>

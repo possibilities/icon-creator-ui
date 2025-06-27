@@ -80,7 +80,7 @@ export function SaveIconsModal({
       })
     })
 
-    const padding = 50
+    const padding = 0
     return `${minX - padding} ${minY - padding} ${maxX - minX + 2 * padding} ${maxY - minY + 2 * padding}`
   }
 
@@ -94,7 +94,6 @@ export function SaveIconsModal({
 
   const generateSVGString = (isDark: boolean): string => {
     const color = isDark ? '#fff' : '#000'
-    const bgColor = isDark ? '#000' : '#fff'
 
     const pathElements = frontFacingPolygons
       .map(polygon => {
@@ -103,10 +102,7 @@ export function SaveIconsModal({
       })
       .join('\n  ')
 
-    const [x, y, width, height] = viewBox.split(' ').map(Number)
-
     return `<svg viewBox="${viewBox}" xmlns="http://www.w3.org/2000/svg">
-  <rect x="${x}" y="${y}" width="${width}" height="${height}" fill="${bgColor}" />
   ${pathElements}
 </svg>`
   }
@@ -235,7 +231,7 @@ export function SaveIconsModal({
           <DialogTitle>Save Icons</DialogTitle>
         </DialogHeader>
 
-        <div className='grid grid-cols-2 gap-6 py-6'>
+        <div className='grid grid-cols-2 gap-6 pt-6'>
           <Card
             className='relative overflow-hidden cursor-pointer transition-colors hover:bg-accent/50'
             onClick={() => setDarkSelected(!darkSelected)}

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -47,19 +47,32 @@ export function SaveAnimationModal({
 }: SaveAnimationModalProps) {
   const [darkSelected, setDarkSelected] = useState(true)
   const [lightSelected, setLightSelected] = useState(true)
-  const [isGeneratingGif, setIsGeneratingGif] = useState(false)
+  const [isGeneratingGif, setIsGeneratingGif] = useState(true)
   const [darkGifUrl, setDarkGifUrl] = useState<string | null>(null)
   const [lightGifUrl, setLightGifUrl] = useState<string | null>(null)
   const [isDownloading, setIsDownloading] = useState(false)
   const [gifKey, setGifKey] = useState(0)
   const searchParams = useSearchParams()
+  const regenerateTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
     if (isOpen && vertices.length > 0 && faces.length > 0) {
-      generateGifPreviews()
+      if (regenerateTimeoutRef.current) {
+        clearTimeout(regenerateTimeoutRef.current)
+      }
+
+      regenerateTimeoutRef.current = setTimeout(() => {
+        generateGifPreviews()
+      }, 100)
+    }
+
+    return () => {
+      if (regenerateTimeoutRef.current) {
+        clearTimeout(regenerateTimeoutRef.current)
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, vertices.length, faces.length])
+  }, [isOpen, vertices.length, faces.length, searchParams])
 
   const generateGifPreviews = async () => {
     setIsGeneratingGif(true)
@@ -270,6 +283,7 @@ export function SaveAnimationModal({
       URL.revokeObjectURL(lightGifUrl)
       setLightGifUrl(null)
     }
+    setIsGeneratingGif(true)
     onClose()
   }
 

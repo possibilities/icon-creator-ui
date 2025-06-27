@@ -70,6 +70,8 @@ export function AnimationRotationSettings() {
         </div>
       </div>
 
+      <div className='border-t border-border' />
+
       <div className='flex items-center justify-between'>
         <Label htmlFor='rotation-direction' className='text-sm'>
           Reverse Direction
@@ -80,6 +82,8 @@ export function AnimationRotationSettings() {
           onCheckedChange={handleDirectionChange}
         />
       </div>
+
+      <div className='border-t border-border' />
     </div>
   )
 }

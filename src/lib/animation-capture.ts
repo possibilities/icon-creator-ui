@@ -16,9 +16,6 @@ export interface AnimationParams {
   stepDuration?: number
   pauseDuration?: number
   pauseMode?: 'none' | 'before' | 'after'
-  axisX: number
-  axisY: number
-  axisZ: number
   direction: 'forward' | 'backward'
 }
 
@@ -126,45 +123,9 @@ export function captureAnimationFrames(
       }
     }
 
-    const axisLength = Math.sqrt(
-      animationParams.axisX ** 2 +
-        animationParams.axisY ** 2 +
-        animationParams.axisZ ** 2,
-    )
-
-    const normalizedAxis = {
-      x: animationParams.axisX / axisLength,
-      y: animationParams.axisY / axisLength,
-      z: animationParams.axisZ / axisLength,
-    }
-
-    let animatedPitch = basePitch
-    let animatedYaw = baseYaw
-    let animatedRoll = baseRoll
-
-    if (
-      animationParams.axisX === 1 &&
-      animationParams.axisY === 0 &&
-      animationParams.axisZ === 0
-    ) {
-      animatedPitch = basePitch + rotationAngle
-    } else if (
-      animationParams.axisX === 0 &&
-      animationParams.axisY === 1 &&
-      animationParams.axisZ === 0
-    ) {
-      animatedYaw = baseYaw + rotationAngle
-    } else if (
-      animationParams.axisX === 0 &&
-      animationParams.axisY === 0 &&
-      animationParams.axisZ === 1
-    ) {
-      animatedRoll = baseRoll + rotationAngle
-    } else {
-      animatedPitch = basePitch + rotationAngle * normalizedAxis.x
-      animatedYaw = baseYaw + rotationAngle * normalizedAxis.y
-      animatedRoll = baseRoll + rotationAngle * normalizedAxis.z
-    }
+    const animatedPitch = basePitch
+    const animatedYaw = baseYaw + rotationAngle
+    const animatedRoll = baseRoll
 
     const projections = calculateProjections({
       vertices,

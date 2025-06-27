@@ -12,12 +12,13 @@ export const URL_PARAMS = {
   BOUNCES: 'bounces',
   STEPS: 'steps',
   STEP_DURATION: 'step-duration',
-  AXIS_TYPE: 'axis-type',
-  AXIS_X: 'axis-x',
-  AXIS_Y: 'axis-y',
-  AXIS_Z: 'axis-z',
   DIRECTION: 'direction',
   PAUSE_DURATION: 'pause-duration',
   REPEAT_COUNT: 'repeat-count',
   PAUSE_MODE: 'pause-mode',
+  // Deprecated - kept for backwards compatibility
+  AXIS_TYPE: 'axis-type',
+  AXIS_X: 'axis-x',
+  AXIS_Y: 'axis-y',
+  AXIS_Z: 'axis-z',
 } as const

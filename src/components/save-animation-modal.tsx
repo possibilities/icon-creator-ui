@@ -76,9 +76,6 @@ export function SaveAnimationModal({
         | 'none'
         | 'before'
         | 'after',
-      axisX: Number(searchParams.get('axisX')) || 0,
-      axisY: Number(searchParams.get('axisY')) || 1,
-      axisZ: Number(searchParams.get('axisZ')) || 0,
       direction:
         searchParams.get('direction') === 'reverse' ? 'backward' : 'forward',
     }

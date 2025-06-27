@@ -17,10 +17,6 @@ const animationPresets = [
     settings: {
       rotationSpeed: 30,
       easingType: 'linear',
-      axisType: 'y',
-      axisX: 0,
-      axisY: 1,
-      axisZ: 0,
       direction: 'forward',
     },
   },
@@ -31,10 +27,6 @@ const animationPresets = [
       rotationSpeed: 20,
       easingType: 'ease-in-out',
       easingStrength: 2.5,
-      axisType: 'y',
-      axisX: 0,
-      axisY: 1,
-      axisZ: 0,
       direction: 'forward',
     },
   },
@@ -46,10 +38,6 @@ const animationPresets = [
       easingType: 'elastic',
       overshoot: 45,
       bounces: 3,
-      axisType: 'y',
-      axisX: 0,
-      axisY: 1,
-      axisZ: 0,
       direction: 'forward',
     },
   },
@@ -61,10 +49,6 @@ const animationPresets = [
       easingType: 'stepped',
       steps: 12,
       stepDuration: 0.15,
-      axisType: 'y',
-      axisX: 0,
-      axisY: 1,
-      axisZ: 0,
       direction: 'forward',
     },
   },
@@ -75,10 +59,6 @@ const animationPresets = [
       rotationSpeed: 35,
       easingType: 'spring',
       overshoot: 30,
-      axisType: 'y',
-      axisX: 0,
-      axisY: 1,
-      axisZ: 0,
       direction: 'forward',
     },
   },
@@ -89,10 +69,6 @@ const animationPresets = [
       rotationSpeed: 60,
       easingType: 'back',
       overshoot: 60,
-      axisType: 'y',
-      axisX: 0,
-      axisY: 1,
-      axisZ: 0,
       direction: 'forward',
     },
   },
@@ -103,10 +79,6 @@ const animationPresets = [
       rotationSpeed: 40,
       easingType: 'bounce',
       bounces: 4,
-      axisType: 'y',
-      axisX: 0,
-      axisY: 1,
-      axisZ: 0,
       direction: 'forward',
     },
   },
@@ -117,10 +89,6 @@ const animationPresets = [
       rotationSpeed: 25,
       easingType: 'ease-out',
       easingStrength: 2,
-      axisType: 'y',
-      axisX: 0,
-      axisY: 1,
-      axisZ: 0,
       direction: 'forward',
     },
   },
@@ -131,10 +99,6 @@ const animationPresets = [
       rotationSpeed: 25,
       easingType: 'ease-in-out',
       easingStrength: 2,
-      axisType: 'x',
-      axisX: 1,
-      axisY: 0,
-      axisZ: 0,
       direction: 'forward',
     },
   },
@@ -144,10 +108,6 @@ const animationPresets = [
     settings: {
       rotationSpeed: 40,
       easingType: 'linear',
-      axisType: 'z',
-      axisX: 0,
-      axisY: 0,
-      axisZ: 1,
       direction: 'forward',
     },
   },
@@ -158,10 +118,6 @@ const animationPresets = [
       rotationSpeed: 30,
       easingType: 'ease-in-out',
       easingStrength: 1.5,
-      axisType: 'custom',
-      axisX: 0.7,
-      axisY: 0.7,
-      axisZ: 0,
       direction: 'forward',
     },
   },
@@ -172,10 +128,6 @@ const animationPresets = [
       rotationSpeed: 20,
       easingType: 'ease-out',
       easingStrength: 2,
-      axisType: 'y',
-      axisX: 0,
-      axisY: 1,
-      axisZ: 0,
       direction: 'reverse',
     },
   },
@@ -198,7 +150,6 @@ export function AnimationPresets() {
   const currentStepDuration = parseFloat(
     searchParams.get(URL_PARAMS.STEP_DURATION) || '0.2',
   )
-  const currentAxisType = searchParams.get(URL_PARAMS.AXIS_TYPE) || 'y'
   const currentDirection = searchParams.get(URL_PARAMS.DIRECTION) || 'forward'
 
   const currentPreset =
@@ -216,7 +167,6 @@ export function AnimationPresets() {
         (settings.steps === undefined || settings.steps === currentSteps) &&
         (settings.stepDuration === undefined ||
           Math.abs(settings.stepDuration - currentStepDuration) < 0.01) &&
-        settings.axisType === currentAxisType &&
         settings.direction === currentDirection
       )
     })?.value || 'custom'
@@ -228,10 +178,6 @@ export function AnimationPresets() {
 
       params.set(URL_PARAMS.SPEED, preset.settings.rotationSpeed.toString())
       params.set(URL_PARAMS.EASING_TYPE, preset.settings.easingType)
-      params.set(URL_PARAMS.AXIS_TYPE, preset.settings.axisType)
-      params.set(URL_PARAMS.AXIS_X, preset.settings.axisX.toString())
-      params.set(URL_PARAMS.AXIS_Y, preset.settings.axisY.toString())
-      params.set(URL_PARAMS.AXIS_Z, preset.settings.axisZ.toString())
       params.set(URL_PARAMS.DIRECTION, preset.settings.direction)
       params.set(URL_PARAMS.ANIMATION_PRESET, value)
 

@@ -80,10 +80,6 @@ const ShapeViewer = ({
       stepDuration: parseFloat(
         searchParams.get(URL_PARAMS.STEP_DURATION) || '0.2',
       ),
-      axisType: searchParams.get(URL_PARAMS.AXIS_TYPE) || 'y',
-      axisX: parseFloat(searchParams.get(URL_PARAMS.AXIS_X) || '0'),
-      axisY: parseFloat(searchParams.get(URL_PARAMS.AXIS_Y) || '1'),
-      axisZ: parseFloat(searchParams.get(URL_PARAMS.AXIS_Z) || '0'),
       direction: searchParams.get(URL_PARAMS.DIRECTION) || 'forward',
       pauseDuration: parseFloat(
         searchParams.get(URL_PARAMS.PAUSE_DURATION) || '0',
@@ -542,58 +538,14 @@ const ShapeViewer = ({
         if (animParams.easingType === 'linear') {
           const rotationDelta = degreesPerSecond * deltaTime
 
-          if (animParams.axisType === 'x') {
-            totalRotationRef.current.pitch += rotationDelta
-            setAnimatedPitch(wrapAngle(pitch + totalRotationRef.current.pitch))
-            setAnimatedYaw(yaw)
-            setAnimatedRoll(roll)
-          } else if (animParams.axisType === 'y') {
-            totalRotationRef.current.yaw += rotationDelta
-            setAnimatedPitch(pitch)
-            setAnimatedYaw(wrapAngle(yaw + totalRotationRef.current.yaw))
-            setAnimatedRoll(roll)
-          } else if (animParams.axisType === 'z') {
-            totalRotationRef.current.roll += rotationDelta
-            setAnimatedPitch(pitch)
-            setAnimatedYaw(yaw)
-            setAnimatedRoll(wrapAngle(roll + totalRotationRef.current.roll))
-          } else if (animParams.axisType === 'custom') {
-            const magnitude = Math.sqrt(
-              animParams.axisX * animParams.axisX +
-                animParams.axisY * animParams.axisY +
-                animParams.axisZ * animParams.axisZ,
-            )
-            if (magnitude > 0) {
-              const normalizedX = animParams.axisX / magnitude
-              const normalizedY = animParams.axisY / magnitude
-              const normalizedZ = animParams.axisZ / magnitude
-
-              totalRotationRef.current.pitch += rotationDelta * normalizedX
-              totalRotationRef.current.yaw += rotationDelta * normalizedY
-              totalRotationRef.current.roll += rotationDelta * normalizedZ
-
-              setAnimatedPitch(
-                wrapAngle(pitch + totalRotationRef.current.pitch),
-              )
-              setAnimatedYaw(wrapAngle(yaw + totalRotationRef.current.yaw))
-              setAnimatedRoll(wrapAngle(roll + totalRotationRef.current.roll))
-            }
-          }
+          // Always rotate around Y axis
+          totalRotationRef.current.yaw += rotationDelta
+          setAnimatedPitch(pitch)
+          setAnimatedYaw(wrapAngle(yaw + totalRotationRef.current.yaw))
+          setAnimatedRoll(roll)
 
           if (animParams.pauseDuration > 0 && pauseStartTimeRef.current === 0) {
-            const totalRotation = Math.abs(
-              animParams.axisType === 'x'
-                ? totalRotationRef.current.pitch
-                : animParams.axisType === 'y'
-                  ? totalRotationRef.current.yaw
-                  : animParams.axisType === 'z'
-                    ? totalRotationRef.current.roll
-                    : Math.sqrt(
-                        totalRotationRef.current.pitch ** 2 +
-                          totalRotationRef.current.yaw ** 2 +
-                          totalRotationRef.current.roll ** 2,
-                      ),
-            )
+            const totalRotation = Math.abs(totalRotationRef.current.yaw)
             const completedCycles = Math.floor(totalRotation / 360)
             if (completedCycles > cycleCountRef.current) {
               cycleCountRef.current = completedCycles
@@ -666,43 +618,11 @@ const ShapeViewer = ({
             (completedRotations * 360 + easedProgress * 360) *
             directionMultiplier
 
-          if (animParams.axisType === 'x') {
-            totalRotationRef.current.pitch = rotationAngle
-            setAnimatedPitch(wrapAngle(pitch + totalRotationRef.current.pitch))
-            setAnimatedYaw(yaw)
-            setAnimatedRoll(roll)
-          } else if (animParams.axisType === 'y') {
-            totalRotationRef.current.yaw = rotationAngle
-            setAnimatedPitch(pitch)
-            setAnimatedYaw(wrapAngle(yaw + totalRotationRef.current.yaw))
-            setAnimatedRoll(roll)
-          } else if (animParams.axisType === 'z') {
-            totalRotationRef.current.roll = rotationAngle
-            setAnimatedPitch(pitch)
-            setAnimatedYaw(yaw)
-            setAnimatedRoll(wrapAngle(roll + totalRotationRef.current.roll))
-          } else if (animParams.axisType === 'custom') {
-            const magnitude = Math.sqrt(
-              animParams.axisX * animParams.axisX +
-                animParams.axisY * animParams.axisY +
-                animParams.axisZ * animParams.axisZ,
-            )
-            if (magnitude > 0) {
-              const normalizedX = animParams.axisX / magnitude
-              const normalizedY = animParams.axisY / magnitude
-              const normalizedZ = animParams.axisZ / magnitude
-
-              totalRotationRef.current.pitch = rotationAngle * normalizedX
-              totalRotationRef.current.yaw = rotationAngle * normalizedY
-              totalRotationRef.current.roll = rotationAngle * normalizedZ
-
-              setAnimatedPitch(
-                wrapAngle(pitch + totalRotationRef.current.pitch),
-              )
-              setAnimatedYaw(wrapAngle(yaw + totalRotationRef.current.yaw))
-              setAnimatedRoll(wrapAngle(roll + totalRotationRef.current.roll))
-            }
-          }
+          // Always rotate around Y axis
+          totalRotationRef.current.yaw = rotationAngle
+          setAnimatedPitch(pitch)
+          setAnimatedYaw(wrapAngle(yaw + totalRotationRef.current.yaw))
+          setAnimatedRoll(roll)
 
           if (animParams.pauseDuration > 0 && pauseStartTimeRef.current === 0) {
             const currentCycleCount = Math.floor(targetRotations)

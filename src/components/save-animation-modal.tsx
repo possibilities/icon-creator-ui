@@ -20,6 +20,7 @@ import {
 import { useSearchParams } from 'next/navigation'
 import JSZip from 'jszip'
 import GIF from 'gif.js'
+import { URL_PARAMS } from '@/lib/viewer-params'
 
 interface SaveAnimationModalProps {
   isOpen: boolean
@@ -64,20 +65,22 @@ export function SaveAnimationModal({
     setIsGeneratingGif(true)
 
     const animationParams: AnimationParams = {
-      rotationSpeed: Number(searchParams.get('rotationSpeed')) || 30,
-      easingType: searchParams.get('easingType') || 'linear',
-      easingStrength: Number(searchParams.get('easingStrength')) || 2,
-      overshoot: Number(searchParams.get('overshoot')) || 20,
-      bounces: Number(searchParams.get('bounces')) || 1,
-      steps: Number(searchParams.get('steps')) || 8,
-      stepDuration: Number(searchParams.get('stepDuration')) || 0.2,
-      pauseDuration: Number(searchParams.get('pauseDuration')) || 0,
-      pauseMode: (searchParams.get('pauseMode') || 'none') as
+      rotationSpeed: Number(searchParams.get(URL_PARAMS.SPEED)) || 30,
+      easingType: searchParams.get(URL_PARAMS.EASING_TYPE) || 'linear',
+      easingStrength: Number(searchParams.get(URL_PARAMS.EASING_STRENGTH)) || 2,
+      overshoot: Number(searchParams.get(URL_PARAMS.OVERSHOOT)) || 20,
+      bounces: Number(searchParams.get(URL_PARAMS.BOUNCES)) || 1,
+      steps: Number(searchParams.get(URL_PARAMS.STEPS)) || 8,
+      stepDuration: Number(searchParams.get(URL_PARAMS.STEP_DURATION)) || 0.2,
+      pauseDuration: Number(searchParams.get(URL_PARAMS.PAUSE_DURATION)) || 0,
+      pauseMode: (searchParams.get(URL_PARAMS.PAUSE_MODE) || 'none') as
         | 'none'
         | 'before'
         | 'after',
       direction:
-        searchParams.get('direction') === 'reverse' ? 'backward' : 'forward',
+        searchParams.get(URL_PARAMS.DIRECTION) === 'reverse'
+          ? 'backward'
+          : 'forward',
     }
 
     const frames = captureAnimationFrames(

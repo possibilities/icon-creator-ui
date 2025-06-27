@@ -16,7 +16,7 @@ export function AnimationEasingSettings() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  const urlEasing = searchParams.get(URL_PARAMS.EASING_TYPE) || 'linear'
+  const urlEasing = searchParams.get(URL_PARAMS.EASING_TYPE) || 'ease-in-out'
   const urlEasingStrength = parseFloat(
     searchParams.get(URL_PARAMS.EASING_STRENGTH) || '1',
   )

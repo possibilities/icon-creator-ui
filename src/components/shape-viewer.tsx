@@ -70,7 +70,7 @@ const ShapeViewer = ({
 
   const getAnimationParams = useCallback(() => {
     return {
-      easingType: searchParams.get(URL_PARAMS.EASING_TYPE) || 'linear',
+      easingType: searchParams.get(URL_PARAMS.EASING_TYPE) || 'ease-in-out',
       easingStrength: parseFloat(
         searchParams.get(URL_PARAMS.EASING_STRENGTH) || '1',
       ),

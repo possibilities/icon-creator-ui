@@ -30,10 +30,13 @@ export default function ShapeContainer({
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  const getInitialValue = (param: string, defaultValue: number): number => {
-    const value = searchParams.get(param)
-    return value ? Number(value) : defaultValue
-  }
+  const getInitialValue = useCallback(
+    (param: string, defaultValue: number): number => {
+      const value = searchParams.get(param)
+      return value ? Number(value) : defaultValue
+    },
+    [searchParams],
+  )
 
   const [gap, setGap] = useState(() => getInitialValue(URL_PARAMS.GAP, GAP))
   const [pitch, setPitch] = useState(() =>
@@ -92,7 +95,7 @@ export default function ShapeContainer({
     if (urlSpeed !== speed) {
       setSpeed(urlSpeed)
     }
-  }, [searchParams, speed])
+  }, [searchParams, speed, getInitialValue])
 
   useEffect(() => {
     debouncedUpdateURL({

@@ -66,7 +66,7 @@ export function SaveAnimationModal({
 
     const animationParams: AnimationParams = {
       rotationSpeed: Number(searchParams.get(URL_PARAMS.SPEED)) || 30,
-      easingType: searchParams.get(URL_PARAMS.EASING_TYPE) || 'linear',
+      easingType: searchParams.get(URL_PARAMS.EASING_TYPE) || 'ease-in-out',
       easingStrength: Number(searchParams.get(URL_PARAMS.EASING_STRENGTH)) || 2,
       overshoot: Number(searchParams.get(URL_PARAMS.OVERSHOOT)) || 20,
       bounces: Number(searchParams.get(URL_PARAMS.BOUNCES)) || 1,

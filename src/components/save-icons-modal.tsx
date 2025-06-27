@@ -92,8 +92,12 @@ export function SaveIconsModal({
   const frontFacingPolygons = projections.filter(p => p.front)
   const viewBox = calculateViewBox(frontFacingPolygons)
 
-  const generateSVGString = (isDark: boolean): string => {
+  const generateSVGString = (
+    isDark: boolean,
+    forSquareIcon: boolean = false,
+  ): string => {
     const color = isDark ? '#fff' : '#000'
+    const bgColor = isDark ? '#000' : '#fff'
 
     const pathElements = frontFacingPolygons
       .map(polygon => {
@@ -101,6 +105,19 @@ export function SaveIconsModal({
         return `<path d="${pathData}" fill="${color}" stroke="none" />`
       })
       .join('\n  ')
+
+    if (forSquareIcon) {
+      const [minX, minY, width, height] = viewBox.split(' ').map(Number)
+      const squareSize = Math.max(width, height)
+      const xOffset = (squareSize - width) / 2
+      const yOffset = (squareSize - height) / 2
+      const squareViewBox = `${minX - xOffset} ${minY - yOffset} ${squareSize} ${squareSize}`
+
+      return `<svg viewBox="${squareViewBox}" xmlns="http://www.w3.org/2000/svg">
+  <rect x="${minX - xOffset}" y="${minY - yOffset}" width="${squareSize}" height="${squareSize}" fill="${bgColor}" />
+  ${pathElements}
+</svg>`
+    }
 
     return `<svg viewBox="${viewBox}" xmlns="http://www.w3.org/2000/svg">
   ${pathElements}
@@ -124,7 +141,8 @@ export function SaveIconsModal({
           if (includeWebIcons) {
             const lightFolder = zip.folder('web-icons-light')
             if (lightFolder) {
-              const lightIcons = await generateFaviconSet(lightSvg)
+              const lightSquareSvg = generateSVGString(false, true)
+              const lightIcons = await generateFaviconSet(lightSquareSvg)
               for (const [filename, data] of Object.entries(lightIcons)) {
                 if (filename === 'favicon.svg') {
                   lightFolder.file(filename, data)
@@ -144,7 +162,8 @@ export function SaveIconsModal({
           if (includeWebIcons) {
             const darkFolder = zip.folder('web-icons-dark')
             if (darkFolder) {
-              const darkIcons = await generateFaviconSet(darkSvg)
+              const darkSquareSvg = generateSVGString(true, true)
+              const darkIcons = await generateFaviconSet(darkSquareSvg)
               for (const [filename, data] of Object.entries(darkIcons)) {
                 if (filename === 'favicon.svg') {
                   darkFolder.file(filename, data)
@@ -207,7 +226,7 @@ export function SaveIconsModal({
   const SVGPreview = ({ isDark }: { isDark: boolean }) => (
     <svg
       viewBox={viewBox}
-      className='w-full h-full'
+      className='max-w-full max-h-full'
       style={{
         backgroundColor: isDark ? '#000' : '#fff',
       }}
@@ -246,7 +265,7 @@ export function SaveIconsModal({
                 />
               </div>
               <div className='p-4 pt-2'>
-                <div className='aspect-square'>
+                <div className='w-full h-48 flex items-center justify-center'>
                   <SVGPreview isDark={true} />
                 </div>
               </div>
@@ -269,7 +288,7 @@ export function SaveIconsModal({
                 />
               </div>
               <div className='p-4 pt-2'>
-                <div className='aspect-square'>
+                <div className='w-full h-48 flex items-center justify-center'>
                   <SVGPreview isDark={false} />
                 </div>
               </div>

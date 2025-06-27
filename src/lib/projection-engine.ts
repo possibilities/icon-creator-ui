@@ -192,7 +192,7 @@ export function calculateProjections(params: ProjectionParams): PolygonData[] {
   const { radius } = calculateBoundingSphere(vertices)
   const fieldOfView = (fov * Math.PI) / 180
   const cameraDistance =
-    params.cameraDistance ?? radius / Math.sin(fieldOfView / 2) + radius
+    params.cameraDistance ?? radius / Math.sin(fieldOfView / 2)
 
   const facesInfo = faces.map((face, i) => {
     const insetVerts = insetFace(face, gap, vertices)

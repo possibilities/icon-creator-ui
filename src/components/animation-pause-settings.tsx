@@ -2,10 +2,17 @@
 
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
-import { Label } from '@/components/ui/label'
-import { Switch } from '@/components/ui/switch'
 import { WideTargetSlider } from '@/components/wide-target-slider'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { URL_PARAMS } from '@/lib/viewer-params'
+
+type PauseMode = 'none' | 'before' | 'after'
 
 export function AnimationPauseSettings() {
   const router = useRouter()
@@ -17,16 +24,27 @@ export function AnimationPauseSettings() {
   const urlRepeatCount = parseInt(
     searchParams.get(URL_PARAMS.REPEAT_COUNT) || '1',
   )
-  const isPauseEnabled = urlPauseDuration > 0
+  const urlPauseMode = (searchParams.get(URL_PARAMS.PAUSE_MODE) ||
+    'none') as PauseMode
 
   const [localPauseDuration, setLocalPauseDuration] = useState(urlPauseDuration)
   const [localRepeatCount, setLocalRepeatCount] = useState(urlRepeatCount)
-  const [pauseEnabled, setPauseEnabled] = useState(isPauseEnabled)
+  const [pauseMode, setPauseMode] = useState<PauseMode>(
+    urlPauseDuration > 0
+      ? urlPauseMode === 'none'
+        ? 'after'
+        : urlPauseMode
+      : 'none',
+  )
 
   useEffect(() => {
     setLocalPauseDuration(urlPauseDuration)
-    setPauseEnabled(urlPauseDuration > 0)
-  }, [urlPauseDuration])
+    if (urlPauseDuration > 0 && urlPauseMode !== 'none') {
+      setPauseMode(urlPauseMode)
+    } else if (urlPauseDuration === 0) {
+      setPauseMode('none')
+    }
+  }, [urlPauseDuration, urlPauseMode])
 
   useEffect(() => {
     setLocalRepeatCount(urlRepeatCount)
@@ -35,7 +53,10 @@ export function AnimationPauseSettings() {
   const updateURL = (updates: Record<string, string | number>) => {
     const params = new URLSearchParams(searchParams.toString())
     Object.entries(updates).forEach(([key, value]) => {
-      if (value === 0 && key === URL_PARAMS.PAUSE_DURATION) {
+      if (
+        (key === URL_PARAMS.PAUSE_DURATION && value === 0) ||
+        (key === URL_PARAMS.PAUSE_MODE && value === 'none')
+      ) {
         params.delete(key)
       } else {
         params.set(key, value.toString())
@@ -44,31 +65,43 @@ export function AnimationPauseSettings() {
     router.push(`?${params.toString()}`)
   }
 
-  const handlePauseToggle = (checked: boolean) => {
-    setPauseEnabled(checked)
-    if (checked) {
+  const handlePauseModeChange = (mode: PauseMode) => {
+    setPauseMode(mode)
+
+    if (mode === 'none') {
+      updateURL({
+        [URL_PARAMS.PAUSE_DURATION]: 0,
+        [URL_PARAMS.PAUSE_MODE]: 'none',
+      })
+    } else {
       const newDuration = localPauseDuration > 0 ? localPauseDuration : 2
       setLocalPauseDuration(newDuration)
-      updateURL({ [URL_PARAMS.PAUSE_DURATION]: newDuration })
-    } else {
-      updateURL({ [URL_PARAMS.PAUSE_DURATION]: 0 })
+      updateURL({
+        [URL_PARAMS.PAUSE_DURATION]: newDuration,
+        [URL_PARAMS.PAUSE_MODE]: mode,
+      })
     }
   }
 
   return (
     <div className='space-y-4'>
-      <div className='flex items-center justify-between'>
-        <Label htmlFor='pause-toggle' className='text-sm font-medium'>
-          Pause Between Cycles
-        </Label>
-        <Switch
-          id='pause-toggle'
-          checked={pauseEnabled}
-          onCheckedChange={handlePauseToggle}
-        />
+      <div>
+        <Select
+          value={pauseMode}
+          onValueChange={value => handlePauseModeChange(value as PauseMode)}
+        >
+          <SelectTrigger className='w-full'>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value='none'>No pause</SelectItem>
+            <SelectItem value='before'>Pause before</SelectItem>
+            <SelectItem value='after'>Pause after</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
-      {pauseEnabled && (
+      {pauseMode !== 'none' && (
         <>
           <div className='space-y-3'>
             <div className='flex items-center justify-between'>

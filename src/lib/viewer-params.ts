@@ -19,4 +19,5 @@ export const URL_PARAMS = {
   DIRECTION: 'direction',
   PAUSE_DURATION: 'pause-duration',
   REPEAT_COUNT: 'repeat-count',
+  PAUSE_MODE: 'pause-mode',
 } as const

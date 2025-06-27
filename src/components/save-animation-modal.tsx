@@ -72,6 +72,10 @@ export function SaveAnimationModal({
       steps: Number(searchParams.get('steps')) || 8,
       stepDuration: Number(searchParams.get('stepDuration')) || 0.2,
       pauseDuration: Number(searchParams.get('pauseDuration')) || 0,
+      pauseMode: (searchParams.get('pauseMode') || 'none') as
+        | 'none'
+        | 'before'
+        | 'after',
       axisX: Number(searchParams.get('axisX')) || 0,
       axisY: Number(searchParams.get('axisY')) || 1,
       axisZ: Number(searchParams.get('axisZ')) || 0,

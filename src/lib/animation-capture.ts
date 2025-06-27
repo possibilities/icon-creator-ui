@@ -15,6 +15,7 @@ export interface AnimationParams {
   steps?: number
   stepDuration?: number
   pauseDuration?: number
+  pauseMode?: 'none' | 'before' | 'after'
   axisX: number
   axisY: number
   axisZ: number
@@ -75,7 +76,9 @@ export function captureAnimationFrames(
 
   const degreesPerSecond = animationParams.rotationSpeed * 6
   const rotationDuration = 360 / degreesPerSecond
-  const totalDuration = rotationDuration + (animationParams.pauseDuration || 0)
+  const pauseDuration = animationParams.pauseDuration || 0
+  const pauseMode = animationParams.pauseMode || 'none'
+  const totalDuration = rotationDuration + pauseDuration
   const frameInterval = 1000 / frameRate
   const totalFrames = Math.ceil((totalDuration * 1000) / frameInterval)
 
@@ -85,16 +88,42 @@ export function captureAnimationFrames(
 
     let rotationAngle = 0
 
-    if (timeInSeconds < rotationDuration) {
-      const progress = timeInSeconds / rotationDuration
+    if (pauseMode === 'none' || pauseDuration === 0) {
+      const progress = Math.min(timeInSeconds / rotationDuration, 1)
       const easedProgress = applyEasing(progress, animationParams)
       rotationAngle = easedProgress * 360
 
       if (animationParams.direction === 'backward') {
         rotationAngle = 360 - rotationAngle
       }
-    } else {
-      rotationAngle = animationParams.direction === 'backward' ? 0 : 360
+    } else if (pauseMode === 'after') {
+      if (timeInSeconds < rotationDuration) {
+        const progress = timeInSeconds / rotationDuration
+        const easedProgress = applyEasing(progress, animationParams)
+        rotationAngle = easedProgress * 360
+
+        if (animationParams.direction === 'backward') {
+          rotationAngle = 360 - rotationAngle
+        }
+      } else {
+        rotationAngle = animationParams.direction === 'backward' ? 0 : 360
+      }
+    } else if (pauseMode === 'before') {
+      if (timeInSeconds < pauseDuration) {
+        rotationAngle = animationParams.direction === 'backward' ? 360 : 0
+      } else {
+        const timeForRotation = timeInSeconds - pauseDuration
+        const progress = timeForRotation / rotationDuration
+        const easedProgress = applyEasing(
+          Math.min(progress, 1),
+          animationParams,
+        )
+        rotationAngle = easedProgress * 360
+
+        if (animationParams.direction === 'backward') {
+          rotationAngle = 360 - rotationAngle
+        }
+      }
     }
 
     const axisLength = Math.sqrt(

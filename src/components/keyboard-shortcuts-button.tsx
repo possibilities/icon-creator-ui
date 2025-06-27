@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import { Keyboard } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -10,9 +10,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { useKeyboardShortcuts } from '@/lib/keyboard-shortcuts-context'
 
 export function KeyboardShortcutsButton() {
-  const [open, setOpen] = useState(false)
+  const { isOpen: open, setIsOpen: setOpen } = useKeyboardShortcuts()
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

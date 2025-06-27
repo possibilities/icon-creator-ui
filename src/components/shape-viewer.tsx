@@ -9,6 +9,7 @@ import { gapToScaleFactor } from '@/lib/polyhedra-client'
 import ClipperLib from 'clipper-lib'
 import { cssVarToX3dColor } from '@/lib/color'
 import { wrapAngle } from '@/lib/rotation-utils'
+import { useKeyboardShortcuts } from '@/lib/keyboard-shortcuts-context'
 
 interface ShapeViewerProps {
   shapeName: string
@@ -41,6 +42,7 @@ const ShapeViewer = ({
   const parentRef = useRef<HTMLDivElement>(null)
   const { theme } = useTheme()
   const searchParams = useSearchParams()
+  const { isOpen: isKeyboardShortcutsOpen } = useKeyboardShortcuts()
   interface X3DElement extends HTMLElement {
     runtime?: { resize?: () => void }
   }
@@ -505,7 +507,7 @@ const ShapeViewer = ({
       motionAnimationRef.current = undefined
     }
 
-    if (mode === 'motion' && speed > 0 && !paused) {
+    if (mode === 'motion' && speed > 0 && !paused && !isKeyboardShortcutsOpen) {
       const animParams = getAnimationParams()
       const startTime = performance.now()
       lastTimeRef.current = startTime
@@ -663,6 +665,7 @@ const ShapeViewer = ({
     getAnimationParams,
     easingFunctions,
     paused,
+    isKeyboardShortcutsOpen,
   ])
 
   useEffect(() => {

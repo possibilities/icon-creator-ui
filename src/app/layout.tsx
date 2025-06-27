@@ -3,6 +3,7 @@ import Script from 'next/script'
 import { ThemeProvider } from '@/lib/theme-provider'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { KeyboardShortcutsButton } from '@/components/keyboard-shortcuts-button'
+import { KeyboardShortcutsProvider } from '@/lib/keyboard-shortcuts-context'
 import './globals.css'
 import './debug.css'
 import './x3dom.css'
@@ -35,13 +36,15 @@ export default function RootLayout({
       </head>
       <body>
         <ThemeProvider>
-          <div className='flex h-screen'>
-            <div className='ml-[25%] w-3/4 h-screen'>{children}</div>
-            <div className='fixed top-4 right-4 z-50 flex flex-col gap-2'>
-              <ThemeToggle />
-              <KeyboardShortcutsButton />
+          <KeyboardShortcutsProvider>
+            <div className='flex h-screen'>
+              <div className='ml-[25%] w-3/4 h-screen'>{children}</div>
+              <div className='fixed top-4 right-4 z-50 flex flex-col gap-2'>
+                <ThemeToggle />
+                <KeyboardShortcutsButton />
+              </div>
             </div>
-          </div>
+          </KeyboardShortcutsProvider>
         </ThemeProvider>
         <Script src='/vendor/x3dom.js' strategy='beforeInteractive' />
       </body>

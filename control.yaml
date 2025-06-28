@@ -1,4 +1,7 @@
 name: 3D Icon Creator
-prompts:
+agents:
+  act: claude
+  plan: claude
+context:
   act: context-composer work-on-icon-creator
   plan: context-composer work-on-icon-creator

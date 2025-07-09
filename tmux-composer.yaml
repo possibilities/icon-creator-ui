@@ -1,2 +1,2 @@
-agents: claude --mcp-config mcp.json
-context: context-composer work-on-icon-creator
+commands:
+  run-agent: dirty-confirm && claude-code-inject && context-composer work-on-icon-creator | claude --mcp-config .claude/inject-mcps.json
